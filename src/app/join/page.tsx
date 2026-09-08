@@ -1,11 +1,13 @@
-export default function JoinPage() {
+import { redirect } from "next/navigation";
+import { getCurrentStudent } from "@/lib/session";
+import { JoinFlow } from "./JoinFlow";
+
+export default async function JoinPage() {
+  const student = await getCurrentStudent();
+  if (student) redirect("/lesson");
   return (
-    <main className="flex flex-1 flex-col items-center justify-center gap-4 p-6 text-center">
-      <h1 className="text-3xl font-bold">Join your class</h1>
-      <p className="opacity-70">
-        Coming in Phase 3: enter a class join code, pick a name and avatar, then
-        tap your face to start the lesson.
-      </p>
+    <main className="mx-auto flex w-full max-w-2xl flex-1 flex-col justify-center gap-6 p-6">
+      <JoinFlow />
     </main>
   );
 }

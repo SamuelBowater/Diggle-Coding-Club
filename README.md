@@ -46,7 +46,7 @@ integration that wires `DATABASE_URL` automatically.
 
 - [x] Phase 1 — scaffold, Tailwind, Drizzle + Neon wiring, stub screens
 - [ ] Phase 2 — schema migrations + seed against a real Neon DB
-- [ ] Phase 3 — join flow (class code, avatar grid, cookie session)
+- [x] Phase 3 — join flow (class code, avatar grid, cookie session)
 - [ ] Phase 4 — Pyodide worker + CodeMirror editor + symbol bar
 - [ ] Phase 5 — lesson player + MDX steps + progress autosave
 - [ ] Phase 6 — gamification (XP, levels, badges, class thermometer)
