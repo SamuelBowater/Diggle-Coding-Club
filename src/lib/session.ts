@@ -40,6 +40,7 @@ export type CurrentStudent = {
   xp: number;
   level: number;
   streak: number;
+  equippedCosmetic: string | null;
   classId: string;
   className: string;
   joinCode: string;
@@ -58,6 +59,7 @@ export async function getCurrentStudent(): Promise<CurrentStudent | null> {
       xp: students.xp,
       level: students.level,
       streak: students.streak,
+      equippedCosmetic: students.equippedCosmetic,
       classId: classes.id,
       className: classes.name,
       joinCode: classes.joinCode,

@@ -13,6 +13,14 @@ export type StepProgress = {
   codeSubmitted: string | null;
 };
 
+export async function listLessonWeeks(): Promise<number[]> {
+  const rows = await db
+    .select({ weekNo: lessons.weekNo })
+    .from(lessons)
+    .orderBy(asc(lessons.weekNo));
+  return rows.map((r) => r.weekNo);
+}
+
 export async function getLessonByWeek(weekNo: number) {
   const [lesson] = await db
     .select()
@@ -28,6 +36,38 @@ export async function getLessonByWeek(weekNo: number) {
     .orderBy(asc(steps.order));
 
   return { lesson, steps: lessonSteps };
+}
+
+export async function getWeekCompletion(studentId: string) {
+  const allLessons = await db
+    .select({ id: lessons.id, weekNo: lessons.weekNo, title: lessons.title })
+    .from(lessons)
+    .orderBy(asc(lessons.weekNo));
+
+  const rows = await db
+    .select({
+      lessonId: steps.lessonId,
+      stepId: steps.id,
+      status: progress.status,
+    })
+    .from(steps)
+    .leftJoin(
+      progress,
+      and(
+        eq(progress.stepId, steps.id),
+        eq(progress.studentId, studentId),
+      ),
+    );
+
+  return allLessons.map((l) => {
+    const forLesson = rows.filter((r) => r.lessonId === l.id);
+    return {
+      week: l.weekNo,
+      title: l.title,
+      total: forLesson.length,
+      done: forLesson.filter((r) => r.status === "complete").length,
+    };
+  });
 }
 
 export async function getProgressForStudent(studentId: string, lessonId: string) {

@@ -49,7 +49,7 @@ integration that wires `DATABASE_URL` automatically.
 - [x] Phase 3 — join flow (class code, avatar grid, cookie session)
 - [x] Phase 4 — Pyodide worker + CodeMirror editor + symbol bar
 - [x] Phase 5 — lesson player + step types + progress autosave + XP/badges
-- [ ] Phase 6 — gamification (XP, levels, badges, class thermometer)
+- [x] Phase 6 — trophy room, level-gated avatar accessories, sound FX, free-roam week picker
 - [x] Phase 7 — teacher console, projector screen, live dashboard, CSV export
 - [x] Phase 8 — all 8 weeks of content drafted (src/content/lessons.ts)
-- [ ] Phase 9 — offline resilience, CSV export, certificates
+- [x] Phase 9 — service worker (offline Pyodide), offline banner, printable certificate

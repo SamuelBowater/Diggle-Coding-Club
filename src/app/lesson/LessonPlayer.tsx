@@ -1,10 +1,17 @@
 "use client";
 
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import { PlayerBar } from "@/components/PlayerBar";
 import { Markdown } from "@/components/Markdown";
 import { PythonEditor } from "@/components/PythonEditor";
+import { WeekPicker } from "./WeekPicker";
 import { normalizeOutput } from "@/lib/steps/check";
+import {
+  playCorrect,
+  playWrong,
+  playLevelUp,
+  playBadge,
+} from "@/lib/sfx";
 import type { Test } from "@/lib/steps/types";
 import type { RunResult } from "@/lib/python/client";
 import {
@@ -35,10 +42,17 @@ export function LessonPlayer({
   student,
   lesson,
   steps,
+  weekNav,
 }: {
-  student: { displayName: string; avatarKey: string; xp: number };
+  student: {
+    displayName: string;
+    avatarKey: string;
+    cosmetic: string | null;
+    xp: number;
+  };
   lesson: { weekNo: number; title: string; introMd: string };
   steps: PlayerStep[];
+  weekNav: { freeRoam: boolean; classWeek: number; availableWeeks: number[] };
 }) {
   const firstIncomplete = steps.findIndex((s) => s.status !== "complete");
   const [index, setIndex] = useState(
@@ -54,13 +68,19 @@ export function LessonPlayer({
   const stepDone = done.has(step.id);
 
   const handleComplete = useCallback((res: SubmitResult) => {
-    if (!res.correct) return;
+    if (!res.correct) {
+      playWrong();
+      return;
+    }
     if (res.totalXp > 0) setXp(res.totalXp);
     setDone((d) => {
       const next = new Set(d);
       next.add(step.id);
       return next;
     });
+    if (res.leveledUp) playLevelUp();
+    else if (res.newBadges.length > 0) playBadge();
+    else playCorrect();
     if (res.awardedXp > 0 || res.leveledUp || res.newBadges.length > 0) {
       setCelebration(res);
     }
@@ -72,10 +92,18 @@ export function LessonPlayer({
       <PlayerBar
         displayName={student.displayName}
         avatarKey={student.avatarKey}
+        cosmetic={student.cosmetic}
         xp={xp}
       />
 
       <div className="mx-auto flex w-full max-w-2xl flex-1 flex-col p-4">
+        {weekNav.freeRoam && weekNav.availableWeeks.length > 1 && (
+          <WeekPicker
+            current={lesson.weekNo}
+            classWeek={weekNav.classWeek}
+            weeks={weekNav.availableWeeks}
+          />
+        )}
         <div className="mb-3 flex items-center gap-1.5">
           {steps.map((s, i) => (
             <button

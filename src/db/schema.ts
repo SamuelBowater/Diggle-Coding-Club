@@ -39,6 +39,7 @@ export const students = pgTable(
     xp: integer("xp").notNull().default(0),
     level: integer("level").notNull().default(1),
     streak: integer("streak").notNull().default(0),
+    equippedCosmetic: text("equipped_cosmetic"),
     lastSeen: timestamp("last_seen", { withTimezone: true }),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   },
