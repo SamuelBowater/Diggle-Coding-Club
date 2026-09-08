@@ -50,6 +50,6 @@ integration that wires `DATABASE_URL` automatically.
 - [x] Phase 4 — Pyodide worker + CodeMirror editor + symbol bar
 - [x] Phase 5 — lesson player + step types + progress autosave + XP/badges
 - [ ] Phase 6 — gamification (XP, levels, badges, class thermometer)
-- [ ] Phase 7 — projector screen + live teacher dashboard
+- [x] Phase 7 — teacher console, projector screen, live dashboard, CSV export
 - [ ] Phase 8 — author all 8 weeks of content
 - [ ] Phase 9 — offline resilience, CSV export, certificates

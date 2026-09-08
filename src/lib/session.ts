@@ -1,36 +1,13 @@
 import "server-only";
 import { cookies } from "next/headers";
-import crypto from "node:crypto";
 import { db } from "@/db";
 import { students, classes } from "@/db/schema";
 import { eq } from "drizzle-orm";
+import { sign, unsign } from "./signing";
 
 const COOKIE_NAME = "diggle_session";
 const PENDING_CLASS_COOKIE = "diggle_pending_class";
 const MAX_AGE = 60 * 60 * 24 * 365; // 1 year
-
-function secret() {
-  const s = process.env.SESSION_SECRET;
-  if (!s) throw new Error("SESSION_SECRET is not set");
-  return s;
-}
-
-function sign(value: string) {
-  const mac = crypto.createHmac("sha256", secret()).update(value).digest("base64url");
-  return `${value}.${mac}`;
-}
-
-function unsign(signed: string): string | null {
-  const idx = signed.lastIndexOf(".");
-  if (idx < 0) return null;
-  const value = signed.slice(0, idx);
-  const expected = sign(value);
-  // constant-time compare
-  const a = Buffer.from(signed);
-  const b = Buffer.from(expected);
-  if (a.length !== b.length || !crypto.timingSafeEqual(a, b)) return null;
-  return value;
-}
 
 export async function setSession(studentId: string) {
   const jar = await cookies();
