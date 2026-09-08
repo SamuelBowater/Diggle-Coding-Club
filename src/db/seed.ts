@@ -1,7 +1,3 @@
-import { config } from "dotenv";
-config({ path: ".env.local" });
-config({ path: ".env" });
-
 import { db } from "./index";
 import { classes, lessons, steps, badges } from "./schema";
 import { sql } from "drizzle-orm";
