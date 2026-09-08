@@ -10,6 +10,7 @@ export type StepProgress = {
   status: string;
   attempts: number;
   usedHint: boolean;
+  codeSubmitted: string | null;
 };
 
 export async function getLessonByWeek(weekNo: number) {
@@ -36,6 +37,7 @@ export async function getProgressForStudent(studentId: string, lessonId: string)
       status: progress.status,
       attempts: progress.attempts,
       usedHint: progress.usedHint,
+      codeSubmitted: progress.codeSubmitted,
     })
     .from(progress)
     .innerJoin(steps, eq(progress.stepId, steps.id))

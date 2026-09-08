@@ -48,7 +48,7 @@ integration that wires `DATABASE_URL` automatically.
 - [ ] Phase 2 — schema migrations + seed against a real Neon DB
 - [x] Phase 3 — join flow (class code, avatar grid, cookie session)
 - [x] Phase 4 — Pyodide worker + CodeMirror editor + symbol bar
-- [ ] Phase 5 — lesson player + MDX steps + progress autosave
+- [x] Phase 5 — lesson player + step types + progress autosave + XP/badges
 - [ ] Phase 6 — gamification (XP, levels, badges, class thermometer)
 - [ ] Phase 7 — projector screen + live teacher dashboard
 - [ ] Phase 8 — author all 8 weeks of content

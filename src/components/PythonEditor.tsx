@@ -20,11 +20,13 @@ export function PythonEditor({
   starter = "",
   stdin,
   onResult,
+  onCodeChange,
   minHeight = 180,
 }: {
   starter?: string;
   stdin?: string[];
   onResult?: (r: RunResult) => void;
+  onCodeChange?: (code: string) => void;
   minHeight?: number;
 }) {
   const hostRef = useRef<HTMLDivElement>(null);
@@ -32,6 +34,9 @@ export function PythonEditor({
   const [status, setStatus] = useState({ ready: false, text: "Loading…" });
   const [running, setRunning] = useState(false);
   const [out, setOut] = useState<RunResult | null>(null);
+
+  const onCodeChangeRef = useRef(onCodeChange);
+  onCodeChangeRef.current = onCodeChange;
 
   useEffect(() => preloadPython(), []);
   useEffect(() => onPythonStatus(setStatus), []);
@@ -47,6 +52,11 @@ export function PythonEditor({
           python(),
           indentUnit.of("    "),
           keymap.of([indentWithTab]),
+          EditorView.updateListener.of((u) => {
+            if (u.docChanged) {
+              onCodeChangeRef.current?.(u.state.doc.toString());
+            }
+          }),
           EditorView.theme({
             "&": { fontSize: "15px" },
             ".cm-content": { fontFamily: "var(--font-mono, monospace)" },
