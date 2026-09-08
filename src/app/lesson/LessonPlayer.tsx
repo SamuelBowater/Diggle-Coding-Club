@@ -366,6 +366,7 @@ function CodeStep({
     <div className="space-y-3">
       <PythonEditor
         starter={step.draftCode ?? step.starterCode ?? ""}
+        stdin={test?.kind === "stdout" ? test.stdin : undefined}
         onResult={onResult}
         onCodeChange={(code) => {
           codeRef.current = code;

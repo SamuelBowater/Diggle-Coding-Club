@@ -10,6 +10,8 @@ export type StdoutTest = {
   kind: "stdout";
   equals?: string;
   contains?: string;
+  /** Lines fed to input() when the student's program runs. */
+  stdin?: string[];
 };
 
 export type ChoiceTest = {

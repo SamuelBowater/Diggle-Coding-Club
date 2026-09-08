@@ -51,5 +51,5 @@ integration that wires `DATABASE_URL` automatically.
 - [x] Phase 5 — lesson player + step types + progress autosave + XP/badges
 - [ ] Phase 6 — gamification (XP, levels, badges, class thermometer)
 - [x] Phase 7 — teacher console, projector screen, live dashboard, CSV export
-- [ ] Phase 8 — author all 8 weeks of content
+- [x] Phase 8 — all 8 weeks of content drafted (src/content/lessons.ts)
 - [ ] Phase 9 — offline resilience, CSV export, certificates
