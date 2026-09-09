@@ -1,7 +1,7 @@
 "use server";
 
 import { redirect } from "next/navigation";
-import { and, eq, inArray, sql } from "drizzle-orm";
+import { and, eq, inArray, isNull, sql } from "drizzle-orm";
 import { db } from "@/db";
 import { students, steps, progress, badges, studentBadges, events } from "@/db/schema";
 import { clearSession, getSessionStudentId } from "@/lib/session";
@@ -195,12 +195,18 @@ async function awardBadges(
   if (step.type === "debug") {
     toGrant.push("bug-squasher");
   }
+  if (step.challengeTier === "hard") {
+    toGrant.push("challenge-champ");
+  }
 
-  // perfect week: every step in this lesson now complete?
+  // perfect week: every *core* step in this lesson now complete
+  // (bonus challenges don't count).
   const lessonSteps = await db
     .select({ id: steps.id })
     .from(steps)
-    .where(eq(steps.lessonId, step.lessonId));
+    .where(
+      and(eq(steps.lessonId, step.lessonId), isNull(steps.challengeTier)),
+    );
   const done = await db
     .select({ id: progress.stepId })
     .from(progress)

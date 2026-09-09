@@ -76,6 +76,9 @@ export const steps = pgTable(
     testsJson: jsonb("tests_json").$type<unknown[]>(),
     hintsJson: jsonb("hints_json").$type<string[]>().default([]),
     xpReward: integer("xp_reward").notNull().default(10),
+    // null = a normal lesson step. "easy" | "hard" = an optional bonus
+    // challenge for fast finishers; doesn't count toward lesson completion.
+    challengeTier: text("challenge_tier").$type<"easy" | "hard">(),
   },
   (t) => [uniqueIndex("steps_lesson_order_idx").on(t.lessonId, t.order)],
 );

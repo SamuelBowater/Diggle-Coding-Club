@@ -15,6 +15,13 @@
       "when": 1788894105225,
       "tag": "0001_slim_the_hunter",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1788941766232,
+      "tag": "0002_amused_genesis",
+      "breakpoints": true
     }
   ]
 }

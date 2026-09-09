@@ -9,6 +9,7 @@ const BADGES = [
   { key: "speed-demon", name: "Speed Demon", description: "Finished a step first try with no hints.", icon: "⚡" },
   { key: "helper", name: "Helper", description: "Helped a classmate (awarded by your teacher).", icon: "\u{1F91D}" },
   { key: "perfect-week", name: "Perfect Week", description: "Completed every step in a lesson.", icon: "⭐" },
+  { key: "challenge-champ", name: "Challenge Champ", description: "Solved a hard bonus challenge.", icon: "\u{1F9E0}" },
   { key: "streak-7", name: "On Fire", description: "Showed up and coded every week.", icon: "\u{1F525}" },
 ];
 
@@ -34,6 +35,7 @@ async function seedLesson(l: SeedLesson) {
       testsJson: s.testsJson ?? null,
       hintsJson: s.hintsJson ?? [],
       xpReward: s.xpReward,
+      challengeTier: s.challengeTier ?? null,
     };
     await db
       .insert(steps)
@@ -49,6 +51,7 @@ async function seedLesson(l: SeedLesson) {
           testsJson: values.testsJson,
           hintsJson: values.hintsJson,
           xpReward: values.xpReward,
+          challengeTier: values.challengeTier,
         },
       });
   }

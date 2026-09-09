@@ -38,7 +38,9 @@ export default async function LessonPage({
 
   const progressMap = await getProgressForStudent(student.id, data.lesson.id);
 
-  const steps: PlayerStep[] = data.steps.map((s) => {
+  const toPlayerStep = (
+    s: (typeof data.steps)[number],
+  ): PlayerStep => {
     const p = progressMap.get(s.id);
     return {
       id: s.id,
@@ -53,8 +55,12 @@ export default async function LessonPage({
       xpReward: s.xpReward,
       status: p?.status ?? "seen",
       draftCode: p?.codeSubmitted ?? null,
+      challengeTier: s.challengeTier ?? null,
     };
-  });
+  };
+
+  const steps: PlayerStep[] = data.steps.map(toPlayerStep);
+  const challenges: PlayerStep[] = data.challenges.map(toPlayerStep);
 
   return (
     <LessonPlayer
@@ -70,6 +76,7 @@ export default async function LessonPage({
         introMd: data.lesson.introMd,
       }}
       steps={steps}
+      challenges={challenges}
       weekNav={{
         freeRoam: student.freeRoam,
         classWeek: student.currentLessonWeek,

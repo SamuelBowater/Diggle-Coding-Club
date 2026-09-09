@@ -34,6 +34,7 @@ export type PlayerStep = {
   xpReward: number;
   status: string;
   draftCode: string | null;
+  challengeTier: "easy" | "hard" | null;
 };
 
 const LABELS = ["A", "B", "C", "D", "E"];
@@ -42,6 +43,7 @@ export function LessonPlayer({
   student,
   lesson,
   steps,
+  challenges,
   weekNav,
 }: {
   student: {
@@ -52,40 +54,58 @@ export function LessonPlayer({
   };
   lesson: { weekNo: number; title: string; introMd: string };
   steps: PlayerStep[];
+  challenges: PlayerStep[];
   weekNav: { freeRoam: boolean; classWeek: number; availableWeeks: number[] };
 }) {
+  const hasChallenges = challenges.length > 0;
+  const pageCount = steps.length + (hasChallenges ? 1 : 0);
+  const coreComplete = steps.every((s) => s.status === "complete");
+
   const firstIncomplete = steps.findIndex((s) => s.status !== "complete");
   const [index, setIndex] = useState(
-    firstIncomplete === -1 ? steps.length - 1 : firstIncomplete,
+    firstIncomplete === -1
+      ? hasChallenges
+        ? steps.length // jump straight to the bonus challenges
+        : steps.length - 1
+      : firstIncomplete,
   );
   const [xp, setXp] = useState(student.xp);
   const [done, setDone] = useState<Set<string>>(
-    () => new Set(steps.filter((s) => s.status === "complete").map((s) => s.id)),
+    () =>
+      new Set(
+        [...steps, ...challenges]
+          .filter((s) => s.status === "complete")
+          .map((s) => s.id),
+      ),
   );
   const [celebration, setCelebration] = useState<SubmitResult | null>(null);
 
-  const step = steps[index];
-  const stepDone = done.has(step.id);
+  const onChallengePage = hasChallenges && index === steps.length;
+  const step = onChallengePage ? null : steps[index];
+  const stepDone = step ? done.has(step.id) : false;
+  const coreDoneCount = steps.filter((s) => done.has(s.id)).length;
 
-  const handleComplete = useCallback((res: SubmitResult) => {
-    if (!res.correct) {
-      playWrong();
-      return;
-    }
-    if (res.totalXp > 0) setXp(res.totalXp);
-    setDone((d) => {
-      const next = new Set(d);
-      next.add(step.id);
-      return next;
-    });
-    if (res.leveledUp) playLevelUp();
-    else if (res.newBadges.length > 0) playBadge();
-    else playCorrect();
-    if (res.awardedXp > 0 || res.leveledUp || res.newBadges.length > 0) {
-      setCelebration(res);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [step.id]);
+  const handleComplete = useCallback(
+    (res: SubmitResult, stepId: string) => {
+      if (!res.correct) {
+        playWrong();
+        return;
+      }
+      if (res.totalXp > 0) setXp(res.totalXp);
+      setDone((d) => {
+        const next = new Set(d);
+        next.add(stepId);
+        return next;
+      });
+      if (res.leveledUp) playLevelUp();
+      else if (res.newBadges.length > 0) playBadge();
+      else playCorrect();
+      if (res.awardedXp > 0 || res.leveledUp || res.newBadges.length > 0) {
+        setCelebration(res);
+      }
+    },
+    [],
+  );
 
   return (
     <div className="flex flex-1 flex-col">
@@ -119,21 +139,53 @@ export function LessonPlayer({
               }`}
             />
           ))}
+          {hasChallenges && (
+            <button
+              onClick={() => setIndex(steps.length)}
+              aria-label="Bonus challenges"
+              disabled={!coreComplete}
+              title={coreComplete ? "Bonus challenges" : "Finish the lesson first"}
+              className={`shrink-0 text-sm ${
+                onChallengePage ? "" : "opacity-50"
+              } disabled:opacity-25`}
+            >
+              ⭐
+            </button>
+          )}
         </div>
 
-        <p className="text-xs font-semibold uppercase tracking-wide text-emerald-600">
-          Week {lesson.weekNo} · Step {index + 1} of {steps.length}
-        </p>
-        <h1 className="mb-3 text-2xl font-bold">{step.title}</h1>
-
-        <div className="flex-1">
-          <StepView
-            key={step.id}
-            step={step}
-            done={stepDone}
-            onComplete={handleComplete}
-          />
-        </div>
+        {onChallengePage ? (
+          <>
+            <p className="text-xs font-semibold uppercase tracking-wide text-emerald-600">
+              Week {lesson.weekNo} · Bonus challenges
+            </p>
+            <h1 className="mb-3 text-2xl font-bold">
+              Finished early? Try these 🚀
+            </h1>
+            <div className="flex-1">
+              <ChallengesPanel
+                challenges={challenges}
+                doneSet={done}
+                onComplete={handleComplete}
+              />
+            </div>
+          </>
+        ) : (
+          <>
+            <p className="text-xs font-semibold uppercase tracking-wide text-emerald-600">
+              Week {lesson.weekNo} · Step {index + 1} of {steps.length}
+            </p>
+            <h1 className="mb-3 text-2xl font-bold">{step!.title}</h1>
+            <div className="flex-1">
+              <StepView
+                key={step!.id}
+                step={step!}
+                done={stepDone}
+                onComplete={handleComplete}
+              />
+            </div>
+          </>
+        )}
 
         <div className="mt-4 flex items-center justify-between gap-3 pb-4">
           <button
@@ -144,12 +196,13 @@ export function LessonPlayer({
             ← Back
           </button>
           <span className="text-sm opacity-60">
-            {done.size}/{steps.length} done
+            {coreDoneCount}/{steps.length} done
           </span>
           <button
-            onClick={() => setIndex((i) => Math.min(steps.length - 1, i + 1))}
+            onClick={() => setIndex((i) => Math.min(pageCount - 1, i + 1))}
             disabled={
-              index === steps.length - 1 || (!stepDone && step.type !== "teach")
+              index >= pageCount - 1 ||
+              (!onChallengePage && !stepDone && step!.type !== "teach")
             }
             className="rounded-xl bg-emerald-600 px-4 py-2 font-semibold text-white disabled:opacity-40"
           >
@@ -163,7 +216,9 @@ export function LessonPlayer({
           result={celebration}
           onClose={() => {
             setCelebration(null);
-            setIndex((i) => Math.min(steps.length - 1, i + 1));
+            if (!onChallengePage) {
+              setIndex((i) => Math.min(pageCount - 1, i + 1));
+            }
           }}
         />
       )}
@@ -178,7 +233,7 @@ function StepView({
 }: {
   step: PlayerStep;
   done: boolean;
-  onComplete: (r: SubmitResult) => void;
+  onComplete: (r: SubmitResult, stepId: string) => void;
 }) {
   return (
     <div className="space-y-4">
@@ -192,6 +247,53 @@ function StepView({
       ) : (
         <CodeStep step={step} done={done} onComplete={onComplete} />
       )}
+    </div>
+  );
+}
+
+function ChallengesPanel({
+  challenges,
+  doneSet,
+  onComplete,
+}: {
+  challenges: PlayerStep[];
+  doneSet: Set<string>;
+  onComplete: (r: SubmitResult, stepId: string) => void;
+}) {
+  return (
+    <div className="space-y-4">
+      <p className="opacity-70">
+        You&apos;ve finished this week&apos;s lesson — nice work! These are extra,
+        so do them if you want a bigger challenge. They don&apos;t affect your
+        Perfect Week.
+      </p>
+      {challenges.map((c) => {
+        const isDone = doneSet.has(c.id);
+        return (
+          <div
+            key={c.id}
+            className="rounded-2xl border p-4"
+          >
+            <div className="mb-2 flex items-center gap-2">
+              <span
+                className={`rounded-full px-2 py-0.5 text-xs font-bold uppercase ${
+                  c.challengeTier === "hard"
+                    ? "bg-red-100 text-red-800 dark:bg-red-950 dark:text-red-200"
+                    : "bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-200"
+                }`}
+              >
+                {c.challengeTier === "hard" ? "Hard" : "Easy"}
+              </span>
+              <span className="font-semibold">{c.title}</span>
+              {isDone && <span className="ml-auto">✅</span>}
+            </div>
+            <div className="space-y-3">
+              <Markdown>{c.contentMd}</Markdown>
+              <CodeStep step={c} done={isDone} onComplete={onComplete} />
+            </div>
+          </div>
+        );
+      })}
     </div>
   );
 }
@@ -211,7 +313,7 @@ function TeachStep({
 }: {
   step: PlayerStep;
   done: boolean;
-  onComplete: (r: SubmitResult) => void;
+  onComplete: (r: SubmitResult, stepId: string) => void;
 }) {
   const [busy, setBusy] = useState(false);
   if (done) return <DoneBanner />;
@@ -220,7 +322,7 @@ function TeachStep({
       disabled={busy}
       onClick={async () => {
         setBusy(true);
-        onComplete(await submitStepAction({ stepId: step.id }));
+        onComplete(await submitStepAction({ stepId: step.id }), step.id);
         setBusy(false);
       }}
       className="rounded-xl bg-emerald-600 px-5 py-2.5 font-semibold text-white disabled:opacity-50"
@@ -237,7 +339,7 @@ function QuizStep({
 }: {
   step: PlayerStep;
   done: boolean;
-  onComplete: (r: SubmitResult) => void;
+  onComplete: (r: SubmitResult, stepId: string) => void;
 }) {
   const choices = step.test?.kind === "choice" ? step.test.choices : [];
   const [picked, setPicked] = useState<number | null>(null);
@@ -270,7 +372,7 @@ function QuizStep({
             choiceLabel: LABELS[picked!],
           });
           setMsg(res.correct ? "" : res.message);
-          onComplete(res);
+          onComplete(res, step.id);
           setBusy(false);
         }}
         className="rounded-xl bg-emerald-600 px-5 py-2.5 font-semibold text-white disabled:opacity-50"
@@ -288,7 +390,7 @@ function PredictStep({
 }: {
   step: PlayerStep;
   done: boolean;
-  onComplete: (r: SubmitResult) => void;
+  onComplete: (r: SubmitResult, stepId: string) => void;
 }) {
   const [guess, setGuess] = useState("");
   const [msg, setMsg] = useState("");
@@ -317,7 +419,7 @@ function PredictStep({
               setBusy(true);
               const res = await submitStepAction({ stepId: step.id, text: guess });
               setMsg(res.correct ? "" : res.message);
-              onComplete(res);
+              onComplete(res, step.id);
               setBusy(false);
             }}
             className="rounded-xl bg-emerald-600 px-5 py-2.5 font-semibold text-white disabled:opacity-50"
@@ -337,7 +439,7 @@ function CodeStep({
 }: {
   step: PlayerStep;
   done: boolean;
-  onComplete: (r: SubmitResult) => void;
+  onComplete: (r: SubmitResult, stepId: string) => void;
 }) {
   const [hintLevel, setHintLevel] = useState(0);
   const [feedback, setFeedback] = useState<{ pass: boolean; text: string } | null>(
@@ -360,7 +462,7 @@ function CodeStep({
         });
         setFeedback({ pass: res.correct, text: res.message });
         if (res.correct) setLocalDone(true);
-        onComplete(res);
+        onComplete(res, step.id);
         return;
       }
       const want = normalizeOutput(test.equals ?? test.contains ?? "");
@@ -385,7 +487,7 @@ function CodeStep({
       });
       setFeedback({ pass: true, text: res.message });
       if (res.correct) setLocalDone(true);
-      onComplete(res);
+      onComplete(res, step.id);
     },
     [step.id, test, onComplete],
   );

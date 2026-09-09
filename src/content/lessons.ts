@@ -14,6 +14,8 @@ export type SeedStep = {
   testsJson?: unknown[];
   hintsJson?: string[];
   xpReward: number;
+  /** Set for optional bonus challenges shown after the core lesson. */
+  challengeTier?: "easy" | "hard";
 };
 
 export type SeedLesson = {
@@ -31,6 +33,31 @@ const choice = (answer: string, choices: string[]) => [
   { kind: "choice", answer, choices },
 ];
 const text = (equals: string) => [{ kind: "text", equals }];
+
+function chal(
+  tier: "easy" | "hard",
+  title: string,
+  contentMd: string,
+  opts: {
+    starterCode?: string;
+    solutionCode: string;
+    tests: unknown[];
+    hints?: string[];
+  },
+): SeedStep {
+  return {
+    order: tier === "easy" ? 90 : 91,
+    type: "code",
+    title,
+    contentMd,
+    starterCode: opts.starterCode,
+    solutionCode: opts.solutionCode,
+    testsJson: opts.tests,
+    hintsJson: opts.hints ?? [],
+    xpReward: tier === "easy" ? 25 : 50,
+    challengeTier: tier,
+  };
+}
 
 // ---------------------------------------------------------------------------
 
@@ -651,8 +678,241 @@ const WEEK_8: SeedLesson = {
 };
 
 // ---------------------------------------------------------------------------
+// Bonus challenges — optional, for kids who reach the end before the rest.
+// They don't count toward lesson completion or the Perfect Week badge.
 
-export const LESSONS: SeedLesson[] = [
+const CHALLENGES: Record<number, SeedStep[]> = {
+  1: [
+    chal(
+      "easy",
+      "Build a pyramid",
+      "Print this shape exactly, using three `print()` lines:\n\n```\n*\n**\n***\n```",
+      {
+        solutionCode: 'print("*")\nprint("**")\nprint("***")',
+        tests: stdout("*\n**\n***"),
+        hints: ["One print() per row.", 'Row 2 is print("**")'],
+      },
+    ),
+    chal(
+      "hard",
+      "Draw a box",
+      "Print this box exactly:\n\n```\n+---+\n|   |\n+---+\n```",
+      {
+        solutionCode: 'print("+---+")\nprint("|   |")\nprint("+---+")',
+        tests: stdout("+---+\n|   |\n+---+"),
+        hints: [
+          "Three print lines again.",
+          'The middle line is a | then 3 spaces then a |',
+        ],
+      },
+    ),
+  ],
+  2: [
+    chal(
+      "easy",
+      "Colour + animal",
+      "Ask for a **colour**, then an **animal**, then print `The <colour> <animal>`.\n\nTest: `blue` then `cat` → **The blue cat**",
+      {
+        starterCode: "colour = input()\nanimal = input()\n\nprint()\n",
+        solutionCode: 'colour = input()\nanimal = input()\nprint("The", colour, animal)',
+        tests: stdout("The blue cat", ["blue", "cat"]),
+        hints: ['print("The", colour, animal)'],
+      },
+    ),
+    chal(
+      "hard",
+      "Name banner",
+      "Ask for a name and print a banner around it:\n\n```\n*********\nHi Sam!\n*********\n```\n\nTest: `Sam` → the banner above.",
+      {
+        starterCode: "name = input()\n",
+        solutionCode:
+          'name = input()\nprint("*********")\nprint("Hi " + name + "!")\nprint("*********")',
+        tests: stdout("*********\nHi Sam!\n*********", ["Sam"]),
+        hints: [
+          "The star lines are always the same — 9 stars.",
+          'Middle line: "Hi " + name + "!"',
+        ],
+      },
+    ),
+  ],
+  3: [
+    chal(
+      "easy",
+      "Minutes to seconds",
+      "Ask for a number of minutes and print how many **seconds** that is.\n\nTest: `5` → **300**",
+      {
+        starterCode: "mins = int(input())\n\nprint()\n",
+        solutionCode: "mins = int(input())\nprint(mins * 60)",
+        tests: stdout("300", ["5"]),
+        hints: ["60 seconds in a minute.", "print(mins * 60)"],
+      },
+    ),
+    chal(
+      "hard",
+      "Total and difference",
+      "Ask for two numbers on separate lines. Print their **total**, then the **first minus the second**, each on its own line.\n\nTest: `10` then `4` → `14` then `6`",
+      {
+        starterCode: "a = int(input())\nb = int(input())\n",
+        solutionCode:
+          "a = int(input())\nb = int(input())\nprint(a + b)\nprint(a - b)",
+        tests: stdout("14\n6", ["10", "4"]),
+        hints: ["Two print lines: a + b, then a - b."],
+      },
+    ),
+  ],
+  4: [
+    chal(
+      "easy",
+      "Child, teen or adult",
+      "Ask for an age. Print `child` if it is under 13, `teen` if 13 to 19, otherwise `adult`.\n\nTest: `15` → **teen**",
+      {
+        starterCode:
+          'age = int(input())\nif age < 13:\n    print("child")\nelif age <= 19:\n    print()\nelse:\n    print("adult")\n',
+        solutionCode:
+          'age = int(input())\nif age < 13:\n    print("child")\nelif age <= 19:\n    print("teen")\nelse:\n    print("adult")',
+        tests: stdout("teen", ["15"]),
+        hints: ['Fill the elif line: print("teen")'],
+      },
+    ),
+    chal(
+      "hard",
+      "Rock, paper, scissors judge",
+      "Ask for **Player 1**'s choice, then **Player 2**'s (`rock`, `paper` or `scissors`). Print `Player 1 wins`, `Player 2 wins` or `Draw`.\n\nTest: `rock` then `scissors` → **Player 1 wins**",
+      {
+        starterCode:
+          'p1 = input()\np2 = input()\n\nif p1 == p2:\n    print("Draw")\n',
+        solutionCode:
+          'p1 = input()\np2 = input()\nif p1 == p2:\n    print("Draw")\nelif (p1 == "rock" and p2 == "scissors") or (p1 == "paper" and p2 == "rock") or (p1 == "scissors" and p2 == "paper"):\n    print("Player 1 wins")\nelse:\n    print("Player 2 wins")',
+        tests: stdout("Player 1 wins", ["rock", "scissors"]),
+        hints: [
+          "Rock beats scissors, paper beats rock, scissors beats paper.",
+          "Check all three winning cases for Player 1 with `or`.",
+        ],
+      },
+    ),
+  ],
+  5: [
+    chal(
+      "easy",
+      "Five times table",
+      "Use a loop to print the 5 times table: `5`, `10`, `15` … up to `50`, each on its own line.",
+      {
+        starterCode: "for i in range(1, 11):\n    print()\n",
+        solutionCode: "for i in range(1, 11):\n    print(i * 5)",
+        tests: stdout("5\n10\n15\n20\n25\n30\n35\n40\n45\n50"),
+        hints: ["range(1, 11) gives 1..10.", "print(i * 5)"],
+      },
+    ),
+    chal(
+      "hard",
+      "Number triangle",
+      "Print this triangle using a loop inside a loop:\n\n```\n1\n12\n123\n1234\n12345\n```",
+      {
+        starterCode:
+          'for row in range(1, 6):\n    line = ""\n    for n in range(1, row + 1):\n        line = line + str(n)\n    print(line)\n',
+        solutionCode:
+          'for row in range(1, 6):\n    line = ""\n    for n in range(1, row + 1):\n        line = line + str(n)\n    print(line)',
+        tests: stdout("1\n12\n123\n1234\n12345"),
+        hints: [
+          "Build each line as a string, then print it.",
+          "The inner loop goes from 1 to row.",
+        ],
+      },
+    ),
+  ],
+  6: [
+    chal(
+      "easy",
+      "Count and last",
+      "A list is given. Print **how many** items it has, then print the **last** item.\n\nExpected: `6` then `42`",
+      {
+        starterCode: "nums = [4, 8, 15, 16, 23, 42]\n",
+        solutionCode:
+          "nums = [4, 8, 15, 16, 23, 42]\nprint(len(nums))\nprint(nums[-1])",
+        tests: stdout("6\n42"),
+        hints: ["len(nums) counts them.", "nums[-1] is the last one."],
+      },
+    ),
+    chal(
+      "hard",
+      "Numbered list",
+      "A list of names is given. Print each one with a number in front:\n\n```\n1. Sam\n2. Alex\n3. Jo\n```",
+      {
+        starterCode:
+          'names = ["Sam", "Alex", "Jo"]\ncount = 1\nfor name in names:\n    print()\n    count = count + 1\n',
+        solutionCode:
+          'names = ["Sam", "Alex", "Jo"]\ncount = 1\nfor name in names:\n    print(str(count) + ". " + name)\n    count = count + 1',
+        tests: stdout("1. Sam\n2. Alex\n3. Jo"),
+        hints: [
+          "Keep a counter that grows each time round the loop.",
+          'print(str(count) + ". " + name)',
+        ],
+      },
+    ),
+  ],
+  7: [
+    chal(
+      "easy",
+      "Square it",
+      "Write a function `square(n)` that returns `n` times `n`. Then print `square(6)`.",
+      {
+        starterCode: "def square(n):\n    return \n\nprint(square(6))\n",
+        solutionCode: "def square(n):\n    return n * n\n\nprint(square(6))",
+        tests: stdout("36"),
+        hints: ["return n * n"],
+      },
+    ),
+    chal(
+      "hard",
+      "Even or odd",
+      "Write a function `even(n)` that returns `yes` if `n` is even and `no` if it is odd. Print `even(4)` then `even(7)`.\n\nExpected: `yes` then `no`\n\n(Hint: `n % 2` is 0 for even numbers.)",
+      {
+        starterCode:
+          'def even(n):\n    if n % 2 == 0:\n        return \n    else:\n        return "no"\n\nprint(even(4))\nprint(even(7))\n',
+        solutionCode:
+          'def even(n):\n    if n % 2 == 0:\n        return "yes"\n    else:\n        return "no"\n\nprint(even(4))\nprint(even(7))',
+        tests: stdout("yes\nno"),
+        hints: ['Fill in: return "yes"'],
+      },
+    ),
+  ],
+  8: [
+    chal(
+      "easy",
+      "Count the guesses",
+      "Add a guess counter to the game. Print `Nope` for each wrong guess, and at the end `You took N guesses`.\n\nTest: guesses `3`, `9`, `7` (secret is 7) → `Nope`, `Nope`, `You took 3 guesses`",
+      {
+        starterCode:
+          'secret = 7\nguess = 0\ntries = 0\nwhile guess != secret:\n    guess = int(input())\n    tries = tries + 1\n    if guess != secret:\n        print("Nope")\nprint()\n',
+        solutionCode:
+          'secret = 7\nguess = 0\ntries = 0\nwhile guess != secret:\n    guess = int(input())\n    tries = tries + 1\n    if guess != secret:\n        print("Nope")\nprint("You took " + str(tries) + " guesses")',
+        tests: stdout("Nope\nNope\nYou took 3 guesses", ["3", "9", "7"]),
+        hints: [
+          "Add 1 to tries every time round the loop.",
+          'Last line: print("You took " + str(tries) + " guesses")',
+        ],
+      },
+    ),
+    chal(
+      "hard",
+      "Two-question quiz",
+      "Make a mini quiz. Ask **“What colour is the sky?”** then **“What is 2 + 2?”**. Add 1 to the score for each right answer (`blue` and `4`). Print `You scored X out of 2`.\n\nTest: answers `blue` then `4` → **You scored 2 out of 2**",
+      {
+        starterCode:
+          'score = 0\na1 = input()\nif a1 == "blue":\n    score = score + 1\na2 = input()\nif a2 == "4":\n    score = score + 1\nprint()\n',
+        solutionCode:
+          'score = 0\na1 = input()\nif a1 == "blue":\n    score = score + 1\na2 = input()\nif a2 == "4":\n    score = score + 1\nprint("You scored " + str(score) + " out of 2")',
+        tests: stdout("You scored 2 out of 2", ["blue", "4"]),
+        hints: [
+          "One if per question, adding to score.",
+          'print("You scored " + str(score) + " out of 2")',
+        ],
+      },
+    ),
+  ],
+};
+
+const BASE_LESSONS: SeedLesson[] = [
   WEEK_1,
   WEEK_2,
   WEEK_3,
@@ -662,3 +922,8 @@ export const LESSONS: SeedLesson[] = [
   WEEK_7,
   WEEK_8,
 ];
+
+export const LESSONS: SeedLesson[] = BASE_LESSONS.map((l) => ({
+  ...l,
+  steps: [...l.steps, ...(CHALLENGES[l.weekNo] ?? [])],
+}));

@@ -1,7 +1,7 @@
 import "server-only";
 import { db } from "@/db";
 import { lessons, steps, progress } from "@/db/schema";
-import { and, asc, eq } from "drizzle-orm";
+import { and, asc, eq, isNull } from "drizzle-orm";
 
 export type Lesson = typeof lessons.$inferSelect;
 export type LessonStep = typeof steps.$inferSelect;
@@ -35,7 +35,11 @@ export async function getLessonByWeek(weekNo: number) {
     .where(eq(steps.lessonId, lesson.id))
     .orderBy(asc(steps.order));
 
-  return { lesson, steps: lessonSteps };
+  return {
+    lesson,
+    steps: lessonSteps.filter((s) => !s.challengeTier),
+    challenges: lessonSteps.filter((s) => s.challengeTier),
+  };
 }
 
 export async function getWeekCompletion(studentId: string) {
@@ -57,7 +61,8 @@ export async function getWeekCompletion(studentId: string) {
         eq(progress.stepId, steps.id),
         eq(progress.studentId, studentId),
       ),
-    );
+    )
+    .where(isNull(steps.challengeTier));
 
   return allLessons.map((l) => {
     const forLesson = rows.filter((r) => r.lessonId === l.id);
