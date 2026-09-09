@@ -89,7 +89,7 @@ export async function signInAction(formData: FormData) {
     .set({ lastSeen: new Date() })
     .where(eq(students.id, studentId));
   await setSession(studentId);
-  redirect("/lesson");
+  redirect("/me");
 }
 
 export type RegisterState =
@@ -148,5 +148,5 @@ export async function registerAction(
   });
 
   await setSession(created.id);
-  redirect("/lesson");
+  redirect("/me");
 }
