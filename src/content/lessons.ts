@@ -94,6 +94,41 @@ const WEEK_1: SeedLesson = {
     },
     {
       order: 3,
+      type: "teach",
+      title: "Comments — notes for humans",
+      contentMd:
+        "Sometimes we want to leave a note in our code that Python **ignores**. Start a line with `#` and Python skips it completely:\n\n```python\n# This line is just a note\nprint(\"Hello!\")\n```\n\nProgrammers use comments to explain what tricky bits of code do — you've already seen them in the starter code!",
+      xpReward: 5,
+    },
+    {
+      order: 4,
+      type: "quiz",
+      title: "Spot the comment",
+      contentMd: "Which of these lines is a comment (Python ignores it)?",
+      testsJson: choice("A", [
+        "# this explains the code",
+        'print("hi")',
+        'name = "Sam"',
+      ]),
+      xpReward: 15,
+    },
+    {
+      order: 5,
+      type: "code",
+      title: "Two lines",
+      contentMd:
+        "Print exactly these two lines:\n\n```\nHi!\nI am learning Python.\n```",
+      starterCode: "# type two print lines\n",
+      solutionCode: 'print("Hi!")\nprint("I am learning Python.")',
+      testsJson: stdout("Hi!\nI am learning Python."),
+      hintsJson: [
+        "You need two separate print() lines.",
+        'print("Hi!") then print("I am learning Python.")',
+      ],
+      xpReward: 20,
+    },
+    {
+      order: 6,
       type: "quiz",
       title: "Which line is right?",
       contentMd: "Which line prints the word **cat**?",
@@ -101,7 +136,7 @@ const WEEK_1: SeedLesson = {
       xpReward: 20,
     },
     {
-      order: 4,
+      order: 7,
       type: "predict",
       title: "Read it in your head",
       contentMd:
@@ -112,7 +147,7 @@ const WEEK_1: SeedLesson = {
       xpReward: 15,
     },
     {
-      order: 5,
+      order: 8,
       type: "debug",
       title: "Fix the broken line",
       contentMd:
@@ -123,6 +158,22 @@ const WEEK_1: SeedLesson = {
       hintsJson: [
         "Words the computer should show need quotes around them.",
         'Add " before I and after code.',
+      ],
+      xpReward: 25,
+    },
+    {
+      order: 9,
+      type: "code",
+      title: "Put it all together",
+      contentMd:
+        "Time for your own mini intro! Print exactly these three lines (copy them carefully, including the apostrophe):\n\n```\nMy name is Coder.\nI am learning Python.\nLet's code!\n```",
+      starterCode: "# your three lines here\n",
+      solutionCode:
+        'print("My name is Coder.")\nprint("I am learning Python.")\nprint("Let\'s code!")',
+      testsJson: stdout("My name is Coder.\nI am learning Python.\nLet's code!"),
+      hintsJson: [
+        "Three print() lines, one per line of text.",
+        "The apostrophe in Let's is fine inside double quotes — no extra work needed.",
       ],
       xpReward: 25,
     },
@@ -163,14 +214,22 @@ const WEEK_2: SeedLesson = {
     },
     {
       order: 3,
-      type: "quiz",
-      title: "Spot the variable",
-      contentMd: "Which line makes a variable called `score`?",
-      testsJson: choice("B", ["print(score)", "score = 10", "10 = score"]),
-      xpReward: 15,
+      type: "teach",
+      title: "Naming your boxes",
+      contentMd:
+        "Variable names have a few rules:\n\n- No spaces — use `highScore`, not `high score`\n- Can't start with a number — `2fast` is not allowed\n- Letters, numbers and `_` only\n\nGood names describe what's inside the box: `score`, `playerName`, `livesLeft`.",
+      xpReward: 5,
     },
     {
       order: 4,
+      type: "quiz",
+      title: "Which is a good variable name?",
+      contentMd: "Which of these is allowed as a variable name in Python?",
+      testsJson: choice("C", ["2fast", "high score", "highScore"]),
+      xpReward: 15,
+    },
+    {
+      order: 5,
       type: "code",
       title: "Join words together",
       contentMd:
@@ -185,7 +244,15 @@ const WEEK_2: SeedLesson = {
       xpReward: 25,
     },
     {
-      order: 5,
+      order: 6,
+      type: "quiz",
+      title: "Spot the variable",
+      contentMd: "Which line makes a variable called `score`?",
+      testsJson: choice("B", ["print(score)", "score = 10", "10 = score"]),
+      xpReward: 15,
+    },
+    {
+      order: 7,
       type: "predict",
       title: "Changing a box",
       contentMd: "A variable can be changed. What does this print?",
@@ -195,7 +262,23 @@ const WEEK_2: SeedLesson = {
       xpReward: 15,
     },
     {
-      order: 6,
+      order: 8,
+      type: "code",
+      title: "Weather report",
+      contentMd:
+        "Ask for a **place**, then a **weather word**, and print `It is <weather> in <place>.`\n\nTest: `Bristol` then `sunny` → **It is sunny in Bristol.**",
+      starterCode: "place = input()\nweather = input()\n\nprint()\n",
+      solutionCode:
+        'place = input()\nweather = input()\nprint("It is " + weather + " in " + place + ".")',
+      testsJson: stdout("It is sunny in Bristol.", ["Bristol", "sunny"]),
+      hintsJson: [
+        "Join the pieces with + — remember the spaces and the full stop.",
+        'print("It is " + weather + " in " + place + ".")',
+      ],
+      xpReward: 25,
+    },
+    {
+      order: 9,
       type: "code",
       title: "Ask the player a question",
       contentMd:
@@ -206,6 +289,22 @@ const WEEK_2: SeedLesson = {
       hintsJson: [
         "Store the answer: name = input()",
         'Then: print("Hi", name)',
+      ],
+      xpReward: 30,
+    },
+    {
+      order: 10,
+      type: "code",
+      title: "Put it all together",
+      contentMd:
+        "Ask for a **name**, then a **hobby**, and print `<name> loves <hobby>!`\n\nTest: `Sam` then `football` → **Sam loves football!**",
+      starterCode: "name = input()\nhobby = input()\n\nprint()\n",
+      solutionCode:
+        'name = input()\nhobby = input()\nprint(name + " loves " + hobby + "!")',
+      testsJson: stdout("Sam loves football!", ["Sam", "football"]),
+      hintsJson: [
+        "Three pieces joined with +: name, \" loves \", hobby, and \"!\"",
+        'print(name + " loves " + hobby + "!")',
       ],
       xpReward: 30,
     },
@@ -242,6 +341,22 @@ const WEEK_3: SeedLesson = {
     },
     {
       order: 3,
+      type: "teach",
+      title: "Remainders with %",
+      contentMd:
+        "`%` gives you the **leftover** after dividing:\n\n```python\nprint(10 % 3)   # 1  (3 goes into 10 three times, 1 left over)\nprint(8 % 2)    # 0  (2 goes in exactly, nothing left over)\n```\n\nA remainder of 0 means the first number divides **exactly**.",
+      xpReward: 5,
+    },
+    {
+      order: 4,
+      type: "quiz",
+      title: "What does 10 % 3 give?",
+      contentMd: "What does `10 % 3` give?",
+      testsJson: choice("B", ["3", "1", "0"]),
+      xpReward: 15,
+    },
+    {
+      order: 5,
       type: "quiz",
       title: "Whole-number divide",
       contentMd:
@@ -250,7 +365,7 @@ const WEEK_3: SeedLesson = {
       xpReward: 15,
     },
     {
-      order: 4,
+      order: 6,
       type: "predict",
       title: "Which sum happens first?",
       contentMd: "Python does `*` before `+`, just like in maths. What prints?",
@@ -260,7 +375,17 @@ const WEEK_3: SeedLesson = {
       xpReward: 15,
     },
     {
-      order: 5,
+      order: 7,
+      type: "predict",
+      title: "Order with subtraction",
+      contentMd: "Same rule with subtraction. What prints?",
+      solutionCode: "print(10 - 2 * 3)",
+      testsJson: text("4"),
+      hintsJson: ["2 * 3 happens first, then subtract from 10."],
+      xpReward: 15,
+    },
+    {
+      order: 8,
       type: "code",
       title: "Double it",
       contentMd:
@@ -272,7 +397,7 @@ const WEEK_3: SeedLesson = {
       xpReward: 25,
     },
     {
-      order: 6,
+      order: 9,
       type: "debug",
       title: "Numbers vs words",
       contentMd:
@@ -285,6 +410,19 @@ const WEEK_3: SeedLesson = {
         "age = int(input())",
       ],
       xpReward: 30,
+    },
+    {
+      order: 10,
+      type: "code",
+      title: "Rectangle area",
+      contentMd:
+        "Ask for a **width**, then a **height** (whole numbers), and print the area (width times height).\n\nTest: `4` then `5` → **20**",
+      starterCode: "width = int(input())\nheight = int(input())\n\nprint()\n",
+      solutionCode:
+        "width = int(input())\nheight = int(input())\nprint(width * height)",
+      testsJson: stdout("20", ["4", "5"]),
+      hintsJson: ["Area = width * height.", "print(width * height)"],
+      xpReward: 25,
     },
   ],
 };
@@ -330,6 +468,39 @@ const WEEK_4: SeedLesson = {
     },
     {
       order: 4,
+      type: "quiz",
+      title: "Not equal to",
+      contentMd: "Which symbol means **“is NOT equal to”**?",
+      testsJson: choice("A", ["!=", "==", "<>"]),
+      xpReward: 15,
+    },
+    {
+      order: 5,
+      type: "teach",
+      title: "Combining checks with and / or",
+      contentMd:
+        "You can check more than one thing at once:\n\n```python\nage = 15\nif age >= 13 and age < 20:\n    print(\"teenager\")\n```\n\n`and` needs **both** sides to be true. `or` needs **at least one** side to be true.",
+      xpReward: 5,
+    },
+    {
+      order: 6,
+      type: "code",
+      title: "Between two numbers",
+      contentMd:
+        "Ask for a number. If it is **1 to 10** (inclusive), print `in range`. Otherwise print `out of range`.\n\nTest: player types **5** → **in range**.",
+      starterCode:
+        'n = int(input())\nif n >= 1 and n <= 10:\n    print()\nelse:\n    print("out of range")\n',
+      solutionCode:
+        'n = int(input())\nif n >= 1 and n <= 10:\n    print("in range")\nelse:\n    print("out of range")',
+      testsJson: stdout("in range", ["5"]),
+      hintsJson: [
+        "Both n >= 1 and n <= 10 need to be true.",
+        'Fill in: print("in range")',
+      ],
+      xpReward: 25,
+    },
+    {
+      order: 7,
       type: "predict",
       title: "The elif ladder",
       contentMd:
@@ -341,7 +512,7 @@ const WEEK_4: SeedLesson = {
       xpReward: 15,
     },
     {
-      order: 5,
+      order: 8,
       type: "code",
       title: "Secret password",
       contentMd:
@@ -354,7 +525,7 @@ const WEEK_4: SeedLesson = {
       xpReward: 25,
     },
     {
-      order: 6,
+      order: 9,
       type: "debug",
       title: "Missing colon",
       contentMd:
@@ -365,6 +536,23 @@ const WEEK_4: SeedLesson = {
       hintsJson: [
         "Add a : at the end of the if line.",
         "Push the print line in with 4 spaces.",
+      ],
+      xpReward: 30,
+    },
+    {
+      order: 10,
+      type: "code",
+      title: "Grade calculator",
+      contentMd:
+        "Ask for a score out of 100 and print a grade: `A` for 90+, `B` for 70+, `C` for 50+, otherwise `D`.\n\nTest: player types **82** → **B**",
+      starterCode:
+        'score = int(input())\nif score >= 90:\n    print("A")\nelif score >= 70:\n    print()\nelif score >= 50:\n    print("C")\nelse:\n    print("D")\n',
+      solutionCode:
+        'score = int(input())\nif score >= 90:\n    print("A")\nelif score >= 70:\n    print("B")\nelif score >= 50:\n    print("C")\nelse:\n    print("D")',
+      testsJson: stdout("B", ["82"]),
+      hintsJson: [
+        "Check the biggest number first, then work down.",
+        'Fill in: print("B")',
       ],
       xpReward: 30,
     },
@@ -409,6 +597,29 @@ const WEEK_5: SeedLesson = {
     },
     {
       order: 4,
+      type: "teach",
+      title: "Stepping through a range",
+      contentMd:
+        "`range()` can take a **step** too — a third number saying how far to jump each time:\n\n```python\nfor i in range(0, 10, 2):\n    print(i)   # 0, 2, 4, 6, 8\n```\n\nThat counts up in **2s**.",
+      xpReward: 5,
+    },
+    {
+      order: 5,
+      type: "code",
+      title: "Even numbers",
+      contentMd:
+        "Use a loop with a step of 2 to print the even numbers **2 to 10**, each on its own line.",
+      starterCode: "for i in range(2, 11, 2):\n    print()\n",
+      solutionCode: "for i in range(2, 11, 2):\n    print(i)",
+      testsJson: stdout("2\n4\n6\n8\n10"),
+      hintsJson: [
+        "range(2, 11, 2) counts 2, 4, 6, 8, 10.",
+        "Print the loop variable: print(i)",
+      ],
+      xpReward: 25,
+    },
+    {
+      order: 6,
       type: "predict",
       title: "Adding in a loop",
       contentMd:
@@ -420,7 +631,17 @@ const WEEK_5: SeedLesson = {
       xpReward: 20,
     },
     {
-      order: 5,
+      order: 7,
+      type: "predict",
+      title: "Tracing a while loop",
+      contentMd: "What does this print, line by line?",
+      solutionCode: "n = 1\nwhile n < 4:\n    print(n)\n    n = n + 1",
+      testsJson: text("1\n2\n3"),
+      hintsJson: ["It stops as soon as n is no longer less than 4."],
+      xpReward: 20,
+    },
+    {
+      order: 8,
       type: "code",
       title: "Rocket countdown",
       contentMd:
@@ -434,7 +655,7 @@ const WEEK_5: SeedLesson = {
       xpReward: 25,
     },
     {
-      order: 6,
+      order: 9,
       type: "debug",
       title: "Off by one",
       contentMd:
@@ -444,6 +665,26 @@ const WEEK_5: SeedLesson = {
       testsJson: stdout("1\n2\n3\n4\n5"),
       hintsJson: ["Change 5 to 6 so it includes the 5."],
       xpReward: 25,
+    },
+    {
+      order: 10,
+      type: "code",
+      title: "Times table",
+      contentMd:
+        "Ask for a number, then print its **times table from 1 to 5**, like:\n\n```\n3 x 1 = 3\n3 x 2 = 6\n3 x 3 = 9\n3 x 4 = 12\n3 x 5 = 15\n```\n\nTest: player types **3** → the table above.",
+      starterCode:
+        'n = int(input())\nfor i in range(1, 6):\n    print()\n',
+      solutionCode:
+        'n = int(input())\nfor i in range(1, 6):\n    print(str(n) + " x " + str(i) + " = " + str(n * i))',
+      testsJson: stdout(
+        "3 x 1 = 3\n3 x 2 = 6\n3 x 3 = 9\n3 x 4 = 12\n3 x 5 = 15",
+        ["3"],
+      ),
+      hintsJson: [
+        "str() turns a number into text so you can join it with +.",
+        'print(str(n) + " x " + str(i) + " = " + str(n * i))',
+      ],
+      xpReward: 35,
     },
   ],
 };
@@ -462,7 +703,7 @@ const WEEK_6: SeedLesson = {
       type: "teach",
       title: "A list holds many things",
       contentMd:
-        "Make a list with square brackets:\n\n```python\nfruits = [\"apple\", \"pear\", \"plum\"]\n```\n\nPick an item by its **position**, starting at **0**:\n\n```python\nprint(fruits[0])   # apple\nprint(fruits[2])   # plum\nprint(len(fruits)) # 3  (how many)\n```",
+        "Make a list with square brackets:\n\n```python\nfruits = [\"apple\", \"pear\", \"plum\"]\n```\n\nPick an item by its **position**, starting at **0**:\n\n```python\nprint(fruits[0])   # apple\nprint(fruits[2])   # plum\n```",
       xpReward: 5,
     },
     {
@@ -486,6 +727,25 @@ const WEEK_6: SeedLesson = {
     },
     {
       order: 4,
+      type: "teach",
+      title: "How many items?",
+      contentMd:
+        "`len()` tells you how many items are in a list:\n\n```python\nfruits = [\"apple\", \"pear\", \"plum\"]\nprint(len(fruits))   # 3\n```",
+      xpReward: 5,
+    },
+    {
+      order: 5,
+      type: "code",
+      title: "Count the list",
+      contentMd: "Print how many scores are in this list.",
+      starterCode: "scores = [10, 20, 30, 40]\nprint()\n",
+      solutionCode: "scores = [10, 20, 30, 40]\nprint(len(scores))",
+      testsJson: stdout("4"),
+      hintsJson: ["print(len(scores))"],
+      xpReward: 20,
+    },
+    {
+      order: 6,
       type: "predict",
       title: "Loop over a list",
       contentMd: "A `for` loop can go through each item. What does this print?",
@@ -495,7 +755,20 @@ const WEEK_6: SeedLesson = {
       xpReward: 15,
     },
     {
-      order: 5,
+      order: 7,
+      type: "code",
+      title: "Change an item",
+      contentMd:
+        "You can change one item using its position. Change position `1` of `pets` to **hamster**, then print the whole list. It should print `['dog', 'hamster', 'fish']`.",
+      starterCode: 'pets = ["dog", "cat", "fish"]\n\nprint(pets)\n',
+      solutionCode:
+        'pets = ["dog", "cat", "fish"]\npets[1] = "hamster"\nprint(pets)',
+      testsJson: stdout("['dog', 'hamster', 'fish']"),
+      hintsJson: ['pets[1] = "hamster"'],
+      xpReward: 25,
+    },
+    {
+      order: 8,
       type: "code",
       title: "Add to the list",
       contentMd:
@@ -507,7 +780,7 @@ const WEEK_6: SeedLesson = {
       xpReward: 25,
     },
     {
-      order: 6,
+      order: 9,
       type: "debug",
       title: "Off the end",
       contentMd:
@@ -517,6 +790,22 @@ const WEEK_6: SeedLesson = {
       testsJson: stdout("blue"),
       hintsJson: ["The second item is position 1, not 2."],
       xpReward: 25,
+    },
+    {
+      order: 10,
+      type: "code",
+      title: "Shopping list total",
+      contentMd:
+        "Loop through this list of prices and print the **total**.",
+      starterCode: "prices = [2, 5, 3]\ntotal = 0\n\nprint(total)\n",
+      solutionCode:
+        "prices = [2, 5, 3]\ntotal = 0\nfor p in prices:\n    total = total + p\nprint(total)",
+      testsJson: stdout("10"),
+      hintsJson: [
+        "Loop through prices, adding each one to total.",
+        "for p in prices:\\n    total = total + p",
+      ],
+      xpReward: 30,
     },
   ],
 };
@@ -556,6 +845,28 @@ const WEEK_7: SeedLesson = {
     },
     {
       order: 3,
+      type: "teach",
+      title: "A function that just prints",
+      contentMd:
+        "Not every function needs `return`. Some just **do** something, like printing:\n\n```python\ndef shout(word):\n    print(word.upper())\n\nshout(\"go\")   # GO\n```\n\n`.upper()` turns text into CAPITALS. This function doesn't give anything back — it just runs when you call it.",
+      xpReward: 5,
+    },
+    {
+      order: 4,
+      type: "code",
+      title: "Say it twice",
+      contentMd:
+        "Finish `repeat_word` so it **prints** the word twice, separated by a space (no `return` needed). Then call `repeat_word(\"go\")`.",
+      starterCode:
+        'def repeat_word(word):\n    print()\n\nrepeat_word("go")\n',
+      solutionCode:
+        'def repeat_word(word):\n    print(word, word)\n\nrepeat_word("go")',
+      testsJson: stdout("go go"),
+      hintsJson: ["print(word, word) prints it twice with a space between."],
+      xpReward: 25,
+    },
+    {
+      order: 5,
       type: "quiz",
       title: "What does return do?",
       contentMd: "What does `return` do inside a function?",
@@ -567,7 +878,7 @@ const WEEK_7: SeedLesson = {
       xpReward: 15,
     },
     {
-      order: 4,
+      order: 6,
       type: "predict",
       title: "Calling twice",
       contentMd: "One function, used twice. What prints?",
@@ -578,7 +889,18 @@ const WEEK_7: SeedLesson = {
       xpReward: 15,
     },
     {
-      order: 5,
+      order: 7,
+      type: "predict",
+      title: "A function calling a function",
+      contentMd: "Functions can use other functions. What prints?",
+      solutionCode:
+        "def double(n):\n    return n * 2\n\ndef quadruple(n):\n    return double(double(n))\n\nprint(quadruple(3))",
+      testsJson: text("12"),
+      hintsJson: ["double(3) is 6, then double(6) is 12."],
+      xpReward: 20,
+    },
+    {
+      order: 8,
       type: "code",
       title: "Add function",
       contentMd:
@@ -590,7 +912,7 @@ const WEEK_7: SeedLesson = {
       xpReward: 25,
     },
     {
-      order: 6,
+      order: 9,
       type: "debug",
       title: "Forgot to call it",
       contentMd:
@@ -600,6 +922,23 @@ const WEEK_7: SeedLesson = {
       testsJson: stdout("hi"),
       hintsJson: ["Add () after say_hi to run it."],
       xpReward: 25,
+    },
+    {
+      order: 10,
+      type: "code",
+      title: "Temperature converter",
+      contentMd:
+        "Write a function `to_f(c)` that converts Celsius to Fahrenheit: `f = c * 9 / 5 + 32`. Ask for a temperature, convert it, and print it as a whole number.\n\nTest: player types **20** → **68**",
+      starterCode:
+        "def to_f(c):\n    return \n\nc = int(input())\nprint(int(to_f(c)))\n",
+      solutionCode:
+        "def to_f(c):\n    return c * 9 / 5 + 32\n\nc = int(input())\nprint(int(to_f(c)))",
+      testsJson: stdout("68", ["20"]),
+      hintsJson: [
+        "return c * 9 / 5 + 32",
+        "int() at the end chops off the .0 so it prints as a whole number.",
+      ],
+      xpReward: 35,
     },
   ],
 };
@@ -623,6 +962,17 @@ const WEEK_8: SeedLesson = {
     },
     {
       order: 2,
+      type: "predict",
+      title: "Before we code it",
+      contentMd: "Let's check the logic first. What does this print?",
+      solutionCode:
+        'secret = 5\nguess = 3\nif guess == secret:\n    print("Correct!")\nelse:\n    print("Try again")',
+      testsJson: text("Try again"),
+      hintsJson: ["3 does not equal 5."],
+      xpReward: 15,
+    },
+    {
+      order: 3,
       type: "code",
       title: "Secret and guess",
       contentMd:
@@ -636,7 +986,7 @@ const WEEK_8: SeedLesson = {
       xpReward: 25,
     },
     {
-      order: 3,
+      order: 4,
       type: "code",
       title: "Higher or lower",
       contentMd:
@@ -650,7 +1000,7 @@ const WEEK_8: SeedLesson = {
       xpReward: 25,
     },
     {
-      order: 4,
+      order: 5,
       type: "code",
       title: "Keep guessing",
       contentMd:
@@ -667,7 +1017,29 @@ const WEEK_8: SeedLesson = {
       xpReward: 35,
     },
     {
-      order: 5,
+      order: 6,
+      type: "code",
+      title: "Play again?",
+      contentMd:
+        "After the player wins, ask **Play again? (yes/no)**. If they type `yes`, print `Great, go again!`, otherwise print `Thanks for playing!`\n\nTest: guesses **3**, **9**, **7**, then answer **no** → `Nope`, `Nope`, `You got it!`, `Thanks for playing!`",
+      starterCode:
+        'secret = 7\nguess = 0\nwhile guess != secret:\n    guess = int(input())\n    if guess != secret:\n        print("Nope")\nprint("You got it!")\nagain = input()\nif again == "yes":\n    print("Great, go again!")\nelse:\n    print()\n',
+      solutionCode:
+        'secret = 7\nguess = 0\nwhile guess != secret:\n    guess = int(input())\n    if guess != secret:\n        print("Nope")\nprint("You got it!")\nagain = input()\nif again == "yes":\n    print("Great, go again!")\nelse:\n    print("Thanks for playing!")',
+      testsJson: stdout("Nope\nNope\nYou got it!\nThanks for playing!", [
+        "3",
+        "9",
+        "7",
+        "no",
+      ]),
+      hintsJson: [
+        "This builds on the game you already wrote — just add the question at the end.",
+        'Fill in the else: print("Thanks for playing!")',
+      ],
+      xpReward: 30,
+    },
+    {
+      order: 7,
       type: "teach",
       title: "Make it yours",
       contentMd:
