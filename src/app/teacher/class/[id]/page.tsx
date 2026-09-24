@@ -40,6 +40,15 @@ export default async function ClassPage({
     .groupBy(students.id)
     .orderBy(desc(students.xp));
 
+  const allBadges = await db
+    .select({
+      key: badges.key,
+      name: badges.name,
+      icon: badges.icon,
+      description: badges.description,
+    })
+    .from(badges);
+
   const earnedBadgeRows = roster.length
     ? await db
         .select({
@@ -127,6 +136,7 @@ export default async function ClassPage({
           <StudentAdmin
             key={s.id}
             classId={id}
+            allBadges={allBadges}
             student={{
               id: s.id,
               displayName: s.displayName,

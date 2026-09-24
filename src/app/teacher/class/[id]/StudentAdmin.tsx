@@ -22,6 +22,7 @@ function ago(iso: string | null): string {
 export function StudentAdmin({
   classId,
   student,
+  allBadges,
 }: {
   classId: string;
   student: {
@@ -35,10 +36,12 @@ export function StudentAdmin({
     earnedBadges: { key: string; name: string; icon: string }[];
     lastSeen: string | null;
   };
+  allBadges: { key: string; name: string; icon: string; description: string }[];
 }) {
   const [name, setName] = useState(student.displayName);
   const [open, setOpen] = useState(false);
   const [pending, start] = useTransition();
+  const earnedKeys = new Set(student.earnedBadges.map((b) => b.key));
 
   return (
     <div className="rounded-xl border p-3">
@@ -61,22 +64,23 @@ export function StudentAdmin({
 
       {open && (
         <div className="mt-3 border-t pt-3">
-          {student.earnedBadges.length > 0 ? (
-            <div className="mb-3 flex flex-wrap gap-2">
-              {student.earnedBadges.map((b) => (
-                <span
+          <div className="mb-3 grid grid-cols-4 gap-2 sm:grid-cols-6">
+            {allBadges.map((b) => {
+              const has = earnedKeys.has(b.key);
+              return (
+                <div
                   key={b.key}
-                  title={b.name}
-                  className="flex items-center gap-1 rounded-full bg-black/5 px-2 py-1 text-xs dark:bg-white/10"
+                  title={has ? b.name : `${b.name} — ${b.description}`}
+                  className={`rounded-lg border p-1.5 text-center ${
+                    has ? "" : "opacity-35 grayscale"
+                  }`}
                 >
-                  <span className="text-base">{b.icon}</span>
-                  {b.name}
-                </span>
-              ))}
-            </div>
-          ) : (
-            <p className="mb-3 text-xs opacity-50">No badges earned yet.</p>
-          )}
+                  <div className="text-lg">{b.icon}</div>
+                  <div className="truncate text-[10px] font-medium">{b.name}</div>
+                </div>
+              );
+            })}
+          </div>
           <div className="flex flex-wrap items-center gap-2">
           <input
             value={name}
