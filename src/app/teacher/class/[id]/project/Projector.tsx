@@ -16,6 +16,7 @@ type PStep = {
   choices: string[] | null;
   correctAnswer: string | null;
   predictAnswer: string | null;
+  challengeTier: "easy" | "hard" | null;
 };
 
 const LETTERS = ["A", "B", "C", "D", "E"];
@@ -46,6 +47,7 @@ export function Projector({
   week,
   lessonTitle,
   steps,
+  challenges,
   initialIndex,
   initialUnlockedOrder,
 }: {
@@ -57,9 +59,15 @@ export function Projector({
   week: number;
   lessonTitle: string;
   steps: PStep[];
+  challenges: PStep[];
   initialIndex: number;
   initialUnlockedOrder: number;
 }) {
+  // The core lesson, then any bonus challenges trailing after it — one
+  // deck of slides so ←/→ walks through both, but only the core steps
+  // are paced/unlocked for students; challenges are always free to show.
+  const slides = useMemo(() => [...steps, ...challenges], [steps, challenges]);
+
   const [i, setI] = useState(initialIndex);
   const [unlockedOrder, setUnlockedOrder] = useState(initialUnlockedOrder);
   const [snap, setSnap] = useState<LiveSnapshot | null>(null);
@@ -80,14 +88,18 @@ export function Projector({
     setRevealed(false);
   }, [i]);
 
+  const isChallengeSlide = i >= steps.length;
+
   // Moving the displayed slide forward also releases students up to that
   // step. Moving back (to recap something) never re-locks what's already
-  // unlocked.
+  // unlocked. Bonus-challenge slides never touch the unlock cursor at all
+  // — they're not part of the paced lesson.
   useEffect(() => {
     if (!mounted.current) {
       mounted.current = true;
       return;
     }
+    if (isChallengeSlide) return;
     const step = steps[i];
     if (step && step.order > unlockedOrder) {
       setUnlockedOrder(step.order);
@@ -136,7 +148,7 @@ export function Projector({
         // Catch up on a reveal made elsewhere too (self-heals within a
         // couple of ticks even if a same-tick navigation briefly re-hides
         // it — never forces hidden->shown the other way round).
-        const curStep = steps[iRef.current];
+        const curStep = slides[iRef.current];
         if (
           curStep &&
           typeof data.revealedStepOrder === "number" &&
@@ -154,7 +166,7 @@ export function Projector({
       alive = false;
       clearInterval(iv);
     };
-  }, [classId, steps]);
+  }, [classId, steps, slides]);
 
   const unlockedIndex = steps.findIndex((s) => s.order === unlockedOrder);
   const canUnlockMore = unlockedIndex >= 0 && unlockedIndex < steps.length - 1;
@@ -169,15 +181,15 @@ export function Projector({
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "ArrowRight" || e.key === "PageDown")
-        setI((n) => Math.min(steps.length - 1, n + 1));
+        setI((n) => Math.min(slides.length - 1, n + 1));
       if (e.key === "ArrowLeft" || e.key === "PageUp")
         setI((n) => Math.max(0, n - 1));
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [steps.length]);
+  }, [slides.length]);
 
-  const step = steps[i];
+  const step = slides[i];
   const total = snap?.students.length ?? 0;
   const onThisStep = step
     ? (snap?.students.filter((s) => s.activeStep === step.order).length ?? 0)
@@ -232,10 +244,23 @@ export function Projector({
       <main className="flex flex-1 flex-col justify-center py-[2vmin]">
         {step ? (
           <div className="text-[2.4vmin] leading-relaxed">
-            <p className="text-[1.6vmin] font-semibold uppercase tracking-widest text-emerald-600">
-              Step {i + 1} of {steps.length} · {step.type}
-            </p>
+            {isChallengeSlide ? (
+              <p className="text-[1.6vmin] font-semibold uppercase tracking-widest text-amber-600">
+                🌟 Bonus challenge · {step.challengeTier === "hard" ? "Hard" : "Easy"} ·{" "}
+                {i - steps.length + 1} of {challenges.length}
+              </p>
+            ) : (
+              <p className="text-[1.6vmin] font-semibold uppercase tracking-widest text-emerald-600">
+                Step {i + 1} of {steps.length} · {step.type}
+              </p>
+            )}
             <h2 className="mb-[2vmin] text-[4vmin] font-extrabold">{step.title}</h2>
+            {isChallengeSlide && (
+              <p className="mb-[1.5vmin] text-[1.8vmin] italic opacity-60">
+                For anyone who finishes the lesson early — everyone else, carry
+                on with your own screen.
+              </p>
+            )}
 
             {(step.type !== "teach" && step.type !== "turtle") || revealed ? (
               <Markdown>{step.contentMd}</Markdown>
@@ -325,7 +350,9 @@ export function Projector({
         <div className="mb-[0.7vmin] flex items-center justify-between text-[1.4vmin] font-semibold uppercase tracking-widest opacity-60">
           <span>Class progress</span>
           <span>
-            {onThisStep} of {total} on step {i + 1}
+            {isChallengeSlide
+              ? `${onThisStep} of ${total} on this challenge`
+              : `${onThisStep} of ${total} on step ${i + 1}`}
           </span>
         </div>
         <div className="flex max-h-[16vmin] flex-wrap gap-[0.6vmin] overflow-y-auto">
@@ -378,7 +405,7 @@ export function Projector({
               ←
             </button>
             <button
-              onClick={() => setI((n) => Math.min(steps.length - 1, n + 1))}
+              onClick={() => setI((n) => Math.min(slides.length - 1, n + 1))}
               className="rounded-lg border px-3 py-1"
             >
               →

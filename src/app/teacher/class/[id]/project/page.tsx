@@ -4,7 +4,7 @@ import { eq } from "drizzle-orm";
 import { db } from "@/db";
 import { classes } from "@/db/schema";
 import { requireTeacher } from "@/lib/teacher";
-import { getLessonByWeek } from "@/lib/lessons";
+import { getLessonByWeek, type LessonStep } from "@/lib/lessons";
 import { firstTest } from "@/lib/steps/types";
 import { qrSvg } from "@/lib/qr";
 import { Projector } from "./Projector";
@@ -36,6 +36,22 @@ export default async function ProjectPage({
   const joinUrl = `${proto}://${host}/join`;
   const svg = await qrSvg(joinUrl);
 
+  const toPStep = (s: LessonStep) => {
+    const t = firstTest(s.testsJson);
+    return {
+      id: s.id,
+      order: s.order,
+      type: s.type,
+      title: s.title,
+      contentMd: s.contentMd,
+      solutionCode: s.solutionCode,
+      choices: t?.kind === "choice" ? t.choices : null,
+      correctAnswer: t?.kind === "choice" ? t.answer : null,
+      predictAnswer: t?.kind === "text" ? t.equals : null,
+      challengeTier: s.challengeTier ?? null,
+    };
+  };
+
   return (
     <Projector
       classId={id}
@@ -47,22 +63,8 @@ export default async function ProjectPage({
       lessonTitle={data?.lesson.title ?? "Lesson coming soon"}
       initialIndex={initialIndex}
       initialUnlockedOrder={cls.currentStepOrder}
-      steps={
-        data?.steps.map((s) => {
-          const t = firstTest(s.testsJson);
-          return {
-            id: s.id,
-            order: s.order,
-            type: s.type,
-            title: s.title,
-            contentMd: s.contentMd,
-            solutionCode: s.solutionCode,
-            choices: t?.kind === "choice" ? t.choices : null,
-            correctAnswer: t?.kind === "choice" ? t.answer : null,
-            predictAnswer: t?.kind === "text" ? t.equals : null,
-          };
-        }) ?? []
-      }
+      steps={data?.steps.map(toPStep) ?? []}
+      challenges={data?.challenges.map(toPStep) ?? []}
     />
   );
 }
