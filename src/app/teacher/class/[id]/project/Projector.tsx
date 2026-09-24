@@ -4,7 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Markdown } from "@/components/Markdown";
 import { avatarEmoji } from "@/lib/avatars";
 import type { LiveSnapshot, LiveStudent } from "@/lib/live";
-import { setCurrentStepOrderAction } from "../../../actions";
+import { setCurrentStepOrderAction, revealStepOrderAction } from "../../../actions";
 
 type PStep = {
   id: string;
@@ -142,6 +142,17 @@ export function Projector({
     });
   }, [snap]);
 
+  function toggleReveal() {
+    setRevealed((r) => {
+      const next = !r;
+      if (next && step && (step.type === "teach" || step.type === "turtle")) {
+        // Persist so students see the explanation too, right away.
+        revealStepOrderAction(classId, step.order);
+      }
+      return next;
+    });
+  }
+
   return (
     <div className="flex min-h-dvh flex-col bg-white p-[3vmin] text-neutral-900 dark:bg-neutral-950 dark:text-neutral-50">
       <header className="flex items-center justify-between">
@@ -228,7 +239,7 @@ export function Projector({
               step.choices ||
               (step.type === "predict" && step.predictAnswer)) && (
               <button
-                onClick={() => setRevealed((r) => !r)}
+                onClick={toggleReveal}
                 className="mt-[2vmin] rounded-xl border px-[2vmin] py-[1vmin] text-[1.8vmin] font-semibold hover:bg-black/5 dark:hover:bg-white/10"
               >
                 {step.type === "teach" || step.type === "turtle"

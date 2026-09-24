@@ -28,6 +28,11 @@ export const classes = pgTable("classes", {
   // as it's navigated, or via its "unlock next step early" button.
   // Resets to 1 when the week changes.
   currentStepOrder: integer("current_step_order").notNull().default(1),
+  // Highest step `order` whose teach-step explanation the teacher has
+  // clicked "reveal" on (only meaningful while that step is the current
+  // one — students auto-see anything the class has since moved past).
+  // Resets to 0 when the week changes.
+  revealedStepOrder: integer("revealed_step_order").notNull().default(0),
   namesLocked: boolean("names_locked").notNull().default(false),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });

@@ -1,0 +1,1 @@
+ALTER TABLE "classes" ADD COLUMN "revealed_step_order" integer DEFAULT 0 NOT NULL;

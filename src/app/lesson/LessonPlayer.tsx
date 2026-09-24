@@ -57,7 +57,12 @@ export function LessonPlayer({
   steps: PlayerStep[];
   challenges: PlayerStep[];
   weekNav: { freeRoam: boolean; classWeek: number; availableWeeks: number[] };
-  pacing: { classId: string; enabled: boolean; initialStepOrder: number };
+  pacing: {
+    classId: string;
+    enabled: boolean;
+    initialStepOrder: number;
+    initialRevealedOrder: number;
+  };
 }) {
   const hasChallenges = challenges.length > 0;
   const pageCount = steps.length + (hasChallenges ? 1 : 0);
@@ -84,6 +89,9 @@ export function LessonPlayer({
   const [teacherStepOrder, setTeacherStepOrder] = useState(
     pacing.initialStepOrder,
   );
+  const [revealedStepOrder, setRevealedStepOrder] = useState(
+    pacing.initialRevealedOrder,
+  );
 
   useEffect(() => {
     if (!pacing.enabled) return;
@@ -96,6 +104,7 @@ export function LessonPlayer({
         if (res.ok && alive) {
           const data = await res.json();
           setTeacherStepOrder(data.currentStepOrder);
+          setRevealedStepOrder(data.revealedStepOrder);
         }
       } catch {
         /* ignore */
@@ -116,6 +125,17 @@ export function LessonPlayer({
   const nextStep = !onChallengePage && index + 1 < steps.length ? steps[index + 1] : null;
   const nextLockedByTeacher =
     pacing.enabled && !!nextStep && nextStep.order > teacherStepOrder;
+
+  // A teach step's explanation is hidden while it's the class's current
+  // step, until the teacher reveals it on the projector. Anything the
+  // class has already moved past just shows (no permanent lockout if the
+  // teacher forgets to click reveal before moving on).
+  const isTeachStep = !!step && (step.type === "teach" || step.type === "turtle");
+  const contentHidden =
+    pacing.enabled &&
+    isTeachStep &&
+    step!.order === teacherStepOrder &&
+    step!.order > revealedStepOrder;
 
   const handleComplete = useCallback(
     (res: SubmitResult, stepId: string) => {
@@ -219,6 +239,7 @@ export function LessonPlayer({
                 step={step!}
                 done={stepDone}
                 onComplete={handleComplete}
+                contentHidden={contentHidden}
               />
             </div>
           </>
@@ -265,11 +286,23 @@ function StepView({
   step,
   done,
   onComplete,
+  contentHidden,
 }: {
   step: PlayerStep;
   done: boolean;
   onComplete: (r: SubmitResult, stepId: string) => void;
+  contentHidden?: boolean;
 }) {
+  if (contentHidden) {
+    return (
+      <div className="space-y-4">
+        <p className="rounded-xl bg-black/5 px-4 py-8 text-center italic opacity-60 dark:bg-white/10">
+          👀 Look up — your teacher is going through this one with the class.
+        </p>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-4">
       <Markdown>{step.contentMd}</Markdown>

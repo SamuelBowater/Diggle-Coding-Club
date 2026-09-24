@@ -34,6 +34,7 @@ export async function GET(
   const [cls] = await db
     .select({
       currentStepOrder: classes.currentStepOrder,
+      revealedStepOrder: classes.revealedStepOrder,
       currentLessonWeek: classes.currentLessonWeek,
     })
     .from(classes)

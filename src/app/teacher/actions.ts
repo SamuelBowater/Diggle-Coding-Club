@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { and, eq } from "drizzle-orm";
+import { and, eq, sql } from "drizzle-orm";
 import { db } from "@/db";
 import { classes, students, badges, studentBadges, progress, events } from "@/db/schema";
 import { requireTeacher } from "@/lib/teacher";
@@ -34,7 +34,11 @@ export async function setWeekAction(classId: string, week: number) {
   await requireTeacher();
   await db
     .update(classes)
-    .set({ currentLessonWeek: Math.max(1, Math.min(8, week)), currentStepOrder: 1 })
+    .set({
+      currentLessonWeek: Math.max(1, Math.min(8, week)),
+      currentStepOrder: 1,
+      revealedStepOrder: 0,
+    })
     .where(eq(classes.id, classId));
   revalidatePath(`/teacher/class/${classId}`);
 }
@@ -55,6 +59,20 @@ export async function setCurrentStepOrderAction(classId: string, order: number) 
   await db
     .update(classes)
     .set({ currentStepOrder: Math.max(1, order) })
+    .where(eq(classes.id, classId));
+}
+
+/**
+ * Called when the teacher clicks "reveal" on a teach step's explanation.
+ * One-way — a student's copy of that step shows the explanation for good
+ * once revealed, even if the teacher later toggles their own view back to
+ * hidden (that toggle only affects the projector's own screen).
+ */
+export async function revealStepOrderAction(classId: string, order: number) {
+  await requireTeacher();
+  await db
+    .update(classes)
+    .set({ revealedStepOrder: sql`greatest(${classes.revealedStepOrder}, ${order})` })
     .where(eq(classes.id, classId));
 }
 

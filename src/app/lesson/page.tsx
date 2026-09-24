@@ -89,6 +89,7 @@ export default async function LessonPage({
         // always self-paced (there's no "teacher position" to follow).
         enabled: week === student.currentLessonWeek,
         initialStepOrder: student.currentStepOrder,
+        initialRevealedOrder: student.revealedStepOrder,
       }}
     />
   );

@@ -36,6 +36,13 @@
       "when": 1790240271744,
       "tag": "0004_mature_fixer",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1790256188474,
+      "tag": "0005_smiling_mentor",
+      "breakpoints": true
     }
   ]
 }
