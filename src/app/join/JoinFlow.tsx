@@ -25,24 +25,36 @@ function SubmitButton({ children }: { children: React.ReactNode }) {
   );
 }
 
-export function JoinFlow() {
+export function JoinFlow({
+  initialRoster,
+}: {
+  initialRoster: ClassRoster | null;
+}) {
   const [lookup, lookupSubmit] = useActionState<LookupState, FormData>(
     lookupClassAction,
     { status: "idle" },
   );
+  const [roster, setRoster] = useState<ClassRoster | null>(initialRoster);
   const [showNew, setShowNew] = useState(false);
   const [code, setCode] = useState("");
   const formRef = useRef<HTMLFormElement>(null);
 
   useEffect(() => {
     if (lookup.status === "error") setCode("");
+    if (lookup.status === "ok") setRoster(lookup.roster);
   }, [lookup]);
 
-  if (lookup.status === "ok" && !showNew) {
-    return <Roster roster={lookup.roster} onNew={() => setShowNew(true)} />;
+  if (roster && !showNew) {
+    return (
+      <Roster
+        roster={roster}
+        onNew={() => setShowNew(true)}
+        onWrongClass={() => setRoster(null)}
+      />
+    );
   }
-  if (lookup.status === "ok" && showNew) {
-    return <NewStudent onBack={() => setShowNew(false)} />;
+  if (roster && showNew) {
+    return <NewStudent roster={roster} onBack={() => setShowNew(false)} />;
   }
 
   return (
@@ -79,9 +91,11 @@ export function JoinFlow() {
 function Roster({
   roster,
   onNew,
+  onWrongClass,
 }: {
   roster: ClassRoster;
   onNew: () => void;
+  onWrongClass: () => void;
 }) {
   return (
     <div className="flex flex-col gap-5 text-center">
@@ -92,6 +106,7 @@ function Roster({
           {roster.students.map((s) => (
             <form key={s.id} action={signInAction}>
               <input type="hidden" name="studentId" value={s.id} />
+              <input type="hidden" name="classId" value={roster.classId} />
               <button
                 type="submit"
                 className="flex w-full flex-col items-center gap-1 rounded-2xl border p-3 hover:bg-emerald-50 active:scale-95 dark:hover:bg-emerald-950"
@@ -109,11 +124,23 @@ function Roster({
       >
         I&apos;m new — set me up
       </button>
+      <button
+        onClick={onWrongClass}
+        className="text-sm opacity-50 underline hover:opacity-80"
+      >
+        Not your class? Enter a different code
+      </button>
     </div>
   );
 }
 
-function NewStudent({ onBack }: { onBack: () => void }) {
+function NewStudent({
+  roster,
+  onBack,
+}: {
+  roster: ClassRoster;
+  onBack: () => void;
+}) {
   const [state, submit] = useActionState<RegisterState, FormData>(registerAction, {
     status: "idle",
   });
@@ -122,6 +149,7 @@ function NewStudent({ onBack }: { onBack: () => void }) {
   return (
     <form action={submit} className="flex flex-col gap-4 text-center">
       <h1 className="text-3xl font-bold">Set up your player</h1>
+      <input type="hidden" name="classId" value={roster.classId} />
 
       <label className="text-left text-sm font-medium">
         Your name

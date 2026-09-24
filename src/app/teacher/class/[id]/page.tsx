@@ -1,9 +1,9 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { headers } from "next/headers";
-import { eq, desc, sql } from "drizzle-orm";
+import { eq, desc, sql, inArray } from "drizzle-orm";
 import { db } from "@/db";
-import { classes, students, studentBadges } from "@/db/schema";
+import { classes, students, studentBadges, badges } from "@/db/schema";
 import { requireTeacher } from "@/lib/teacher";
 import { qrSvg } from "@/lib/qr";
 import { levelName } from "@/lib/xp";
@@ -39,6 +39,33 @@ export default async function ClassPage({
     .where(eq(students.classId, id))
     .groupBy(students.id)
     .orderBy(desc(students.xp));
+
+  const earnedBadgeRows = roster.length
+    ? await db
+        .select({
+          studentId: studentBadges.studentId,
+          key: badges.key,
+          name: badges.name,
+          icon: badges.icon,
+        })
+        .from(studentBadges)
+        .innerJoin(badges, eq(badges.id, studentBadges.badgeId))
+        .where(
+          inArray(
+            studentBadges.studentId,
+            roster.map((s) => s.id),
+          ),
+        )
+    : [];
+  const badgesByStudent = new Map<
+    string,
+    { key: string; name: string; icon: string }[]
+  >();
+  for (const row of earnedBadgeRows) {
+    const list = badgesByStudent.get(row.studentId) ?? [];
+    list.push({ key: row.key, name: row.name, icon: row.icon });
+    badgesByStudent.set(row.studentId, list);
+  }
 
   const h = await headers();
   const host = h.get("x-forwarded-host") ?? h.get("host") ?? "localhost:3000";
@@ -108,6 +135,7 @@ export default async function ClassPage({
               level: s.level,
               levelName: levelName(s.level),
               badges: Number(s.badges),
+              earnedBadges: badgesByStudent.get(s.id) ?? [],
               lastSeen: s.lastSeen ? new Date(s.lastSeen).toISOString() : null,
             }}
           />

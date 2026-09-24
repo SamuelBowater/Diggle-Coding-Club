@@ -32,6 +32,7 @@ export function StudentAdmin({
     level: number;
     levelName: string;
     badges: number;
+    earnedBadges: { key: string; name: string; icon: string }[];
     lastSeen: string | null;
   };
 }) {
@@ -59,7 +60,24 @@ export function StudentAdmin({
       </div>
 
       {open && (
-        <div className="mt-3 flex flex-wrap items-center gap-2 border-t pt-3">
+        <div className="mt-3 border-t pt-3">
+          {student.earnedBadges.length > 0 ? (
+            <div className="mb-3 flex flex-wrap gap-2">
+              {student.earnedBadges.map((b) => (
+                <span
+                  key={b.key}
+                  title={b.name}
+                  className="flex items-center gap-1 rounded-full bg-black/5 px-2 py-1 text-xs dark:bg-white/10"
+                >
+                  <span className="text-base">{b.icon}</span>
+                  {b.name}
+                </span>
+              ))}
+            </div>
+          ) : (
+            <p className="mb-3 text-xs opacity-50">No badges earned yet.</p>
+          )}
+          <div className="flex flex-wrap items-center gap-2">
           <input
             value={name}
             onChange={(e) => setName(e.target.value)}
@@ -103,6 +121,7 @@ export function StudentAdmin({
           >
             Delete
           </button>
+          </div>
         </div>
       )}
     </div>

@@ -244,16 +244,16 @@ export function Projector({
       <main className="flex flex-1 flex-col justify-center py-[2vmin]">
         {step ? (
           <div className="text-[2.4vmin] leading-relaxed">
-            {isChallengeSlide ? (
-              <p className="text-[1.6vmin] font-semibold uppercase tracking-widest text-amber-600">
-                🌟 Bonus challenge · {step.challengeTier === "hard" ? "Hard" : "Easy"} ·{" "}
-                {i - steps.length + 1} of {challenges.length}
-              </p>
-            ) : (
-              <p className="text-[1.6vmin] font-semibold uppercase tracking-widest text-emerald-600">
-                Step {i + 1} of {steps.length} · {step.type}
-              </p>
-            )}
+            <p
+              className={`text-[1.6vmin] font-semibold uppercase tracking-widest ${
+                isChallengeSlide ? "text-amber-600" : "text-emerald-600"
+              }`}
+            >
+              Step {i + 1} of {slides.length} ·{" "}
+              {isChallengeSlide
+                ? `🌟 Bonus challenge (${step.challengeTier === "hard" ? "Hard" : "Easy"})`
+                : step.type}
+            </p>
             <h2 className="mb-[2vmin] text-[4vmin] font-extrabold">{step.title}</h2>
             {isChallengeSlide && (
               <p className="mb-[1.5vmin] text-[1.8vmin] italic opacity-60">

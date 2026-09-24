@@ -5,7 +5,7 @@ import { db } from "@/db";
 import { classes, students, events } from "@/db/schema";
 import { and, eq } from "drizzle-orm";
 import { isValidAvatar } from "@/lib/avatars";
-import { setSession, setPendingClass, getPendingClassId } from "@/lib/session";
+import { setSession } from "@/lib/session";
 
 export type ClassRoster = {
   classId: string;
@@ -26,7 +26,7 @@ function normalizeCode(raw: string): string {
     .replace(/^-+|-+$/g, "");
 }
 
-async function loadRoster(classId: string): Promise<ClassRoster | null> {
+export async function loadRoster(classId: string): Promise<ClassRoster | null> {
   const cls = await db
     .select({ id: classes.id, name: classes.name })
     .from(classes)
@@ -65,21 +65,24 @@ export async function lookupClassAction(
     };
   }
 
-  await setPendingClass(cls[0].id);
   const roster = await loadRoster(cls[0].id);
   if (!roster) return { status: "error", message: "Something went wrong. Try again." };
   return { status: "ok", roster };
 }
 
+// studentId and classId travel through the form itself (hidden fields) rather
+// than a "pending class" cookie — every visit to /join shows the roster and
+// requires an explicit tap, on purpose, since iPads get handed to a
+// different kid between sessions.
 export async function signInAction(formData: FormData) {
   const studentId = String(formData.get("studentId") ?? "");
-  const pendingClassId = await getPendingClassId();
-  if (!pendingClassId) redirect("/join");
+  const classId = String(formData.get("classId") ?? "");
+  if (!studentId || !classId) redirect("/join");
 
   const row = await db
-    .select({ id: students.id, classId: students.classId })
+    .select({ id: students.id })
     .from(students)
-    .where(and(eq(students.id, studentId), eq(students.classId, pendingClassId)))
+    .where(and(eq(students.id, studentId), eq(students.classId, classId)))
     .limit(1);
 
   if (!row[0]) redirect("/join");
@@ -100,11 +103,18 @@ export async function registerAction(
   _prev: RegisterState,
   formData: FormData,
 ): Promise<RegisterState> {
-  const pendingClassId = await getPendingClassId();
-  if (!pendingClassId) return { status: "error", message: "Enter your class code again." };
-
+  const classId = String(formData.get("classId") ?? "");
   const displayName = String(formData.get("displayName") ?? "").trim().slice(0, 24);
   const avatarKey = String(formData.get("avatarKey") ?? "");
+
+  const cls = await db
+    .select({ id: classes.id })
+    .from(classes)
+    .where(eq(classes.id, classId))
+    .limit(1);
+  if (!cls[0]) {
+    return { status: "error", message: "Enter your class code again." };
+  }
 
   if (displayName.length < 2) {
     return { status: "error", message: "Type a name with at least 2 letters." };
@@ -118,7 +128,7 @@ export async function registerAction(
     .from(students)
     .where(
       and(
-        eq(students.classId, pendingClassId),
+        eq(students.classId, classId),
         eq(students.displayName, displayName),
       ),
     )
@@ -133,7 +143,7 @@ export async function registerAction(
   const [created] = await db
     .insert(students)
     .values({
-      classId: pendingClassId,
+      classId,
       displayName,
       avatarKey,
       lastSeen: new Date(),
@@ -141,7 +151,7 @@ export async function registerAction(
     .returning({ id: students.id });
 
   await db.insert(events).values({
-    classId: pendingClassId,
+    classId,
     studentId: created.id,
     type: "student_joined",
     payloadJson: { displayName },

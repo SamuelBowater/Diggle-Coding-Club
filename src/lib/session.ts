@@ -6,7 +6,6 @@ import { eq } from "drizzle-orm";
 import { sign, unsign } from "./signing";
 
 const COOKIE_NAME = "diggle_session";
-const PENDING_CLASS_COOKIE = "diggle_pending_class";
 const MAX_AGE = 60 * 60 * 24 * 365; // 1 year
 
 export async function setSession(studentId: string) {
@@ -18,7 +17,6 @@ export async function setSession(studentId: string) {
     path: "/",
     maxAge: MAX_AGE,
   });
-  jar.delete(PENDING_CLASS_COOKIE);
 }
 
 export async function clearSession() {
@@ -75,24 +73,4 @@ export async function getCurrentStudent(): Promise<CurrentStudent | null> {
     .where(eq(students.id, id))
     .limit(1);
   return rows[0] ?? null;
-}
-
-// --- pending class (between entering a code and choosing a name) ---
-
-export async function setPendingClass(classId: string) {
-  const jar = await cookies();
-  jar.set(PENDING_CLASS_COOKIE, sign(classId), {
-    httpOnly: true,
-    sameSite: "lax",
-    secure: process.env.NODE_ENV === "production",
-    path: "/",
-    maxAge: 60 * 30, // 30 minutes
-  });
-}
-
-export async function getPendingClassId(): Promise<string | null> {
-  const jar = await cookies();
-  const raw = jar.get(PENDING_CLASS_COOKIE)?.value;
-  if (!raw) return null;
-  return unsign(raw);
 }
