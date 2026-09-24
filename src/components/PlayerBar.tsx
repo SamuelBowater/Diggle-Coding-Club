@@ -18,6 +18,12 @@ export function PlayerBar({
   const p = levelProgress(xp);
   return (
     <header className="sticky top-0 z-10 flex items-center gap-3 border-b bg-background/90 px-4 py-2 backdrop-blur">
+      <Link
+        href="/me"
+        className="shrink-0 rounded-lg border px-2 py-1 text-xs opacity-70 hover:opacity-100"
+      >
+        ← Dashboard
+      </Link>
       <Link href="/me" aria-label="My trophies">
         <Avatar avatarKey={avatarKey} cosmetic={cosmetic} size={32} />
       </Link>

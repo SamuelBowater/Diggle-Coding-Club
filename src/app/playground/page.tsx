@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { getCurrentStudent } from "@/lib/session";
 import { PythonEditor } from "@/components/PythonEditor";
 import { PlayerBar } from "@/components/PlayerBar";
@@ -29,12 +28,7 @@ export default async function PlaygroundPage() {
         />
       )}
       <main className="mx-auto w-full max-w-2xl flex-1 p-5">
-        {student && (
-          <Link href="/me" className="text-sm opacity-60 hover:opacity-100">
-            ← Back to my dashboard
-          </Link>
-        )}
-        <h1 className="mb-1 mt-1 text-2xl font-bold">🎨 Free Play</h1>
+        <h1 className="mb-1 text-2xl font-bold">🎨 Free Play</h1>
         <p className="mb-4 text-sm opacity-70">
           A scratch space for trying things out — no lesson, no checking, no
           XP. Nothing here is saved, so if you write something brilliant,
