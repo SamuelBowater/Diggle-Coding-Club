@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Markdown } from "@/components/Markdown";
-import type { LiveSnapshot } from "@/lib/live";
+import { avatarEmoji } from "@/lib/avatars";
+import type { LiveSnapshot, LiveStudent } from "@/lib/live";
 import { setCurrentStepOrderAction } from "../../../actions";
 
 type PStep = {
@@ -17,6 +18,23 @@ type PStep = {
 
 const LETTERS = ["A", "B", "C", "D", "E"];
 
+const STATUS_STYLE: Record<LiveStudent["status"], string> = {
+  done: "bg-emerald-500 text-white",
+  working: "bg-amber-300 text-amber-950",
+  stuck: "bg-red-500 text-white",
+  idle: "bg-black/10 text-black/50 dark:bg-white/10 dark:text-white/50",
+  "not-started": "bg-black/5 text-black/40 dark:bg-white/5 dark:text-white/40",
+};
+
+// Float the students who need attention to the front of the roster.
+const STATUS_PRIORITY: Record<LiveStudent["status"], number> = {
+  stuck: 0,
+  working: 1,
+  "not-started": 2,
+  idle: 3,
+  done: 4,
+};
+
 export function Projector({
   classId,
   className,
@@ -27,7 +45,7 @@ export function Projector({
   lessonTitle,
   steps,
   initialIndex,
-  pacedByTeacher,
+  initialUnlockedOrder,
 }: {
   classId: string;
   className: string;
@@ -38,21 +56,26 @@ export function Projector({
   lessonTitle: string;
   steps: PStep[];
   initialIndex: number;
-  pacedByTeacher: boolean;
+  initialUnlockedOrder: number;
 }) {
   const [i, setI] = useState(initialIndex);
+  const [unlockedOrder, setUnlockedOrder] = useState(initialUnlockedOrder);
   const [snap, setSnap] = useState<LiveSnapshot | null>(null);
   const mounted = useRef(false);
 
+  // Moving the displayed slide forward also releases students up to that
+  // step. Moving back (to recap something) never re-locks what's already
+  // unlocked.
   useEffect(() => {
-    // Skip the write on first mount — the index already reflects what's
-    // persisted, no need to round-trip it straight back.
     if (!mounted.current) {
       mounted.current = true;
       return;
     }
     const step = steps[i];
-    if (step) setCurrentStepOrderAction(classId, step.order);
+    if (step && step.order > unlockedOrder) {
+      setUnlockedOrder(step.order);
+      setCurrentStepOrderAction(classId, step.order);
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [i]);
 
@@ -74,6 +97,16 @@ export function Projector({
     };
   }, [classId]);
 
+  const unlockedIndex = steps.findIndex((s) => s.order === unlockedOrder);
+  const canUnlockMore = unlockedIndex >= 0 && unlockedIndex < steps.length - 1;
+
+  function unlockNextEarly() {
+    const next = steps[unlockedIndex + 1];
+    if (!next) return;
+    setUnlockedOrder(next.order);
+    setCurrentStepOrderAction(classId, next.order);
+  }
+
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "ArrowRight" || e.key === "PageDown")
@@ -93,17 +126,23 @@ export function Projector({
   const goalXp = Math.max(200, total * 100);
   const xpPct = snap ? Math.min(100, Math.round((snap.classXp / goalXp) * 100)) : 0;
 
+  const roster = useMemo(() => {
+    const list = snap?.students ?? [];
+    return [...list].sort((a, b) => {
+      const p = STATUS_PRIORITY[a.status] - STATUS_PRIORITY[b.status];
+      return p !== 0 ? p : a.displayName.localeCompare(b.displayName);
+    });
+  }, [snap]);
+
   return (
     <div className="flex min-h-dvh flex-col bg-white p-[3vmin] text-neutral-900 dark:bg-neutral-950 dark:text-neutral-50">
       <header className="flex items-center justify-between">
         <div>
           <p className="text-[1.6vmin] font-semibold uppercase tracking-widest text-emerald-600">
             {className} · Week {week}
-            {pacedByTeacher && (
-              <span className="ml-[1.5vmin] rounded-full bg-emerald-600 px-[1.2vmin] py-[0.2vmin] text-[1.3vmin] text-white">
-                🔒 Paced — students follow this screen
-              </span>
-            )}
+            <span className="ml-[1.5vmin] rounded-full bg-emerald-600 px-[1.2vmin] py-[0.2vmin] text-[1.3vmin] text-white">
+              🔒 Unlocked up to step {unlockedIndex + 1}
+            </span>
           </p>
           <h1 className="text-[3vmin] font-bold">{lessonTitle}</h1>
         </div>
@@ -120,7 +159,7 @@ export function Projector({
         </div>
       </header>
 
-      <main className="flex flex-1 flex-col justify-center py-[3vmin]">
+      <main className="flex flex-1 flex-col justify-center py-[2vmin]">
         {step ? (
           <div className="text-[2.4vmin] leading-relaxed">
             <p className="text-[1.6vmin] font-semibold uppercase tracking-widest text-emerald-600">
@@ -159,7 +198,33 @@ export function Projector({
         )}
       </main>
 
-      <footer className="space-y-[1.4vmin]">
+      <section className="border-t pt-[1.2vmin]">
+        <div className="mb-[0.7vmin] flex items-center justify-between text-[1.4vmin] font-semibold uppercase tracking-widest opacity-60">
+          <span>Class progress</span>
+          <span>
+            {onThisStep} of {total} on step {i + 1}
+          </span>
+        </div>
+        <div className="flex max-h-[16vmin] flex-wrap gap-[0.6vmin] overflow-y-auto">
+          {roster.length === 0 && (
+            <p className="text-[1.5vmin] opacity-50">No students have joined yet.</p>
+          )}
+          {roster.map((s) => (
+            <div
+              key={s.id}
+              className={`flex items-center gap-[0.5vmin] rounded-lg px-[1vmin] py-[0.5vmin] text-[1.4vmin] ${STATUS_STYLE[s.status]}`}
+            >
+              <span className="text-[2vmin] leading-none">{avatarEmoji(s.avatarKey)}</span>
+              <span className="max-w-[10vmin] truncate font-semibold">{s.displayName}</span>
+              <span className="opacity-80">
+                {s.activeStep}/{steps.length}
+              </span>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <footer className="mt-[1.2vmin] space-y-[1.2vmin]">
         <div className="flex items-center gap-[2vmin] text-[1.8vmin]">
           <span className="font-semibold">Class XP</span>
           <div className="h-[2.4vmin] flex-1 overflow-hidden rounded-full bg-black/10 dark:bg-white/15">
@@ -173,11 +238,16 @@ export function Projector({
           </span>
         </div>
         <div className="flex items-center justify-between text-[1.6vmin] opacity-70">
-          <span>
-            {onThisStep} of {total} students on this step
-          </span>
           <span>← / → to move through the lesson</span>
-          <div className="flex gap-2">
+          <div className="flex items-center gap-[1vmin]">
+            <button
+              onClick={unlockNextEarly}
+              disabled={!canUnlockMore}
+              title="Release the next step for everyone without changing what's on screen"
+              className="rounded-lg border px-3 py-1 disabled:opacity-30"
+            >
+              🔓 Unlock next step early
+            </button>
             <button
               onClick={() => setI((n) => Math.max(0, n - 1))}
               className="rounded-lg border px-3 py-1"

@@ -84,9 +84,10 @@ export default async function LessonPage({
       }}
       pacing={{
         classId: student.classId,
-        // Pacing only makes sense while viewing the week the class is
-        // actually on — free-roaming ahead/behind is always self-paced.
-        enabled: student.pacedByTeacher && week === student.currentLessonWeek,
+        // Every lesson is locked to the teacher's pace by default.
+        // Free-roaming to a different week than the class is on is
+        // always self-paced (there's no "teacher position" to follow).
+        enabled: week === student.currentLessonWeek,
         initialStepOrder: student.currentStepOrder,
       }}
     />

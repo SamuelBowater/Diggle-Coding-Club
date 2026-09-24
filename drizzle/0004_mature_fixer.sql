@@ -1,0 +1,1 @@
+ALTER TABLE "classes" DROP COLUMN "paced_by_teacher";

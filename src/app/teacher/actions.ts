@@ -45,17 +45,11 @@ export async function toggleFreeRoamAction(classId: string, value: boolean) {
   revalidatePath(`/teacher/class/${classId}`);
 }
 
-export async function toggleTeacherPaceAction(classId: string, value: boolean) {
-  await requireTeacher();
-  await db
-    .update(classes)
-    .set({ pacedByTeacher: value })
-    .where(eq(classes.id, classId));
-  revalidatePath(`/teacher/class/${classId}`);
-  revalidatePath(`/teacher/class/${classId}/project`);
-}
-
-/** Called from the projector as the teacher steps through the lesson. */
+/**
+ * Called from the projector as the teacher steps through the lesson, or
+ * from its "unlock next step early" button. Students can never move past
+ * whatever this is currently set to (bonus challenges are exempt).
+ */
 export async function setCurrentStepOrderAction(classId: string, order: number) {
   await requireTeacher();
   await db

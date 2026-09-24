@@ -33,7 +33,6 @@ export async function GET(
 
   const [cls] = await db
     .select({
-      pacedByTeacher: classes.pacedByTeacher,
       currentStepOrder: classes.currentStepOrder,
       currentLessonWeek: classes.currentLessonWeek,
     })

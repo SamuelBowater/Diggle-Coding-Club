@@ -46,7 +46,7 @@ export default async function ProjectPage({
       week={cls.currentLessonWeek}
       lessonTitle={data?.lesson.title ?? "Lesson coming soon"}
       initialIndex={initialIndex}
-      pacedByTeacher={cls.pacedByTeacher}
+      initialUnlockedOrder={cls.currentStepOrder}
       steps={
         data?.steps.map((s) => {
           const t = firstTest(s.testsJson);
