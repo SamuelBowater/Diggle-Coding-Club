@@ -102,6 +102,27 @@ export default async function MePage() {
         )}
       </section>
 
+      {/* Free play */}
+      <section className="mt-4">
+        <Link
+          href="/playground"
+          className="flex items-center justify-between gap-3 rounded-2xl border-2 border-dashed border-black/15 p-4 hover:bg-black/5 dark:border-white/25 dark:hover:bg-white/10"
+        >
+          <span>
+            <span className="text-xs font-semibold uppercase tracking-wide opacity-60">
+              Free play
+            </span>
+            <span className="block text-lg font-bold">🎨 Just code — no rules</span>
+            <span className="text-sm opacity-70">
+              Finished the lesson and the bonus challenges? Come and experiment.
+            </span>
+          </span>
+          <span className="shrink-0 rounded-xl border px-4 py-2 font-semibold">
+            Open →
+          </span>
+        </Link>
+      </section>
+
       {/* All weeks */}
       <section className="mt-6">
         <h2 className="text-lg font-bold">All weeks</h2>
