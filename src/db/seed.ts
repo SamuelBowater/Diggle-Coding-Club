@@ -10,6 +10,14 @@ const BADGES = [
   { key: "helper", name: "Helper", description: "Helped a classmate (awarded by your teacher).", icon: "\u{1F91D}" },
   { key: "perfect-week", name: "Perfect Week", description: "Completed every step in a lesson.", icon: "⭐" },
   { key: "challenge-champ", name: "Challenge Champ", description: "Solved a hard bonus challenge.", icon: "\u{1F9E0}" },
+  { key: "double-trouble", name: "Double Trouble", description: "Solved both bonus challenges in one week.", icon: "\u{1F3AF}" },
+  { key: "quiz-whiz", name: "Quiz Whiz", description: "Got 5 quiz questions right.", icon: "\u{1F9E9}" },
+  { key: "predictor", name: "Predictor", description: "Correctly predicted what 5 programs would print.", icon: "\u{1F52E}" },
+  { key: "century-club", name: "Century Club", description: "Earned 100 XP.", icon: "\u{1F4AF}" },
+  { key: "high-roller", name: "High Roller", description: "Earned 500 XP.", icon: "\u{1F3B2}" },
+  { key: "xp-legend", name: "XP Legend", description: "Earned 1000 XP.", icon: "\u{1F31F}" },
+  { key: "halfway-hero", name: "Halfway Hero", description: "Completed 4 weeks of lessons.", icon: "\u{26F0}\u{FE0F}" },
+  { key: "code-graduate", name: "Code Graduate", description: "Completed all 8 weeks of the club!", icon: "\u{1F393}" },
   { key: "streak-7", name: "On Fire", description: "Showed up and coded every week.", icon: "\u{1F525}" },
 ];
 
