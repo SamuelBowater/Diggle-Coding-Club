@@ -58,6 +58,8 @@ export default async function ProjectPage({
             contentMd: s.contentMd,
             solutionCode: s.solutionCode,
             choices: t?.kind === "choice" ? t.choices : null,
+            correctAnswer: t?.kind === "choice" ? t.answer : null,
+            predictAnswer: t?.kind === "text" ? t.equals : null,
           };
         }) ?? []
       }

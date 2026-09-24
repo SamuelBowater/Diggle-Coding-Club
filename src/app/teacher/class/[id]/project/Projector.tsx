@@ -14,6 +14,8 @@ type PStep = {
   contentMd: string;
   solutionCode: string | null;
   choices: string[] | null;
+  correctAnswer: string | null;
+  predictAnswer: string | null;
 };
 
 const LETTERS = ["A", "B", "C", "D", "E"];
@@ -61,7 +63,13 @@ export function Projector({
   const [i, setI] = useState(initialIndex);
   const [unlockedOrder, setUnlockedOrder] = useState(initialUnlockedOrder);
   const [snap, setSnap] = useState<LiveSnapshot | null>(null);
+  const [revealed, setRevealed] = useState(false);
   const mounted = useRef(false);
+
+  // Ask the class first — hide the answer again whenever the slide changes.
+  useEffect(() => {
+    setRevealed(false);
+  }, [i]);
 
   // Moving the displayed slide forward also releases students up to that
   // step. Moving back (to recap something) never re-locks what's already
@@ -167,19 +175,56 @@ export function Projector({
             </p>
             <h2 className="mb-[2vmin] text-[4vmin] font-extrabold">{step.title}</h2>
             <Markdown>{step.contentMd}</Markdown>
+
+            {step.type === "predict" && step.solutionCode && (
+              <pre className="mt-[2vmin] overflow-x-auto rounded-xl bg-neutral-900 p-[2vmin] text-neutral-100">
+                {step.solutionCode}
+              </pre>
+            )}
+
             {step.choices && (
               <ul className="mt-[2vmin] space-y-[1vmin]">
-                {step.choices.map((c, idx) => (
-                  <li
-                    key={idx}
-                    className="rounded-xl border p-[1.5vmin] font-mono"
-                  >
-                    <b className="mr-3">{LETTERS[idx]}</b>
-                    {c}
-                  </li>
-                ))}
+                {step.choices.map((c, idx) => {
+                  const letter = LETTERS[idx];
+                  const isAnswer = revealed && letter === step.correctAnswer;
+                  return (
+                    <li
+                      key={idx}
+                      className={`rounded-xl border p-[1.5vmin] font-mono ${
+                        isAnswer
+                          ? "border-emerald-600 bg-emerald-50 dark:bg-emerald-950"
+                          : ""
+                      }`}
+                    >
+                      <b className="mr-3">{letter}</b>
+                      {c}
+                      {isAnswer && <span className="ml-[1vmin]">✅</span>}
+                    </li>
+                  );
+                })}
               </ul>
             )}
+
+            {step.type === "predict" && step.predictAnswer && revealed && (
+              <div className="mt-[2vmin]">
+                <p className="text-[1.4vmin] font-semibold uppercase tracking-widest text-emerald-600">
+                  Answer
+                </p>
+                <pre className="mt-1 overflow-x-auto whitespace-pre-wrap rounded-xl bg-neutral-900 p-[2vmin] text-neutral-100">
+                  {step.predictAnswer}
+                </pre>
+              </div>
+            )}
+
+            {(step.choices || (step.type === "predict" && step.predictAnswer)) && (
+              <button
+                onClick={() => setRevealed((r) => !r)}
+                className="mt-[2vmin] rounded-xl border px-[2vmin] py-[1vmin] text-[1.8vmin] font-semibold hover:bg-black/5 dark:hover:bg-white/10"
+              >
+                {revealed ? "🙈 Hide answer" : "👁 Ask the class, then reveal answer"}
+              </button>
+            )}
+
             {step.solutionCode && step.type !== "predict" && (
               <details className="mt-[2vmin] text-[1.8vmin]">
                 <summary className="cursor-pointer opacity-60">
