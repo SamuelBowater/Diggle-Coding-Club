@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import Link from "next/link";
 import { Markdown } from "@/components/Markdown";
 import { avatarEmoji } from "@/lib/avatars";
 import type { LiveSnapshot, LiveStudent } from "@/lib/live";
@@ -220,6 +221,12 @@ export function Projector({
     <div className="flex min-h-dvh flex-col bg-white p-[3vmin] text-neutral-900 dark:bg-neutral-950 dark:text-neutral-50">
       <header className="flex items-center justify-between">
         <div>
+          <Link
+            href={`/teacher/class/${classId}`}
+            className="mb-[0.4vmin] inline-block text-[1.3vmin] opacity-50 hover:opacity-90"
+          >
+            ← Back to class
+          </Link>
           <p className="text-[1.6vmin] font-semibold uppercase tracking-widest text-emerald-600">
             {className} · Week {week}
             <span className="ml-[1.5vmin] rounded-full bg-emerald-600 px-[1.2vmin] py-[0.2vmin] text-[1.3vmin] text-white">
