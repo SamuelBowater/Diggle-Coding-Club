@@ -174,7 +174,14 @@ export function Projector({
               Step {i + 1} of {steps.length} · {step.type}
             </p>
             <h2 className="mb-[2vmin] text-[4vmin] font-extrabold">{step.title}</h2>
-            <Markdown>{step.contentMd}</Markdown>
+
+            {(step.type !== "teach" && step.type !== "turtle") || revealed ? (
+              <Markdown>{step.contentMd}</Markdown>
+            ) : (
+              <p className="italic opacity-50">
+                (Explanation hidden — ask the class first, then reveal.)
+              </p>
+            )}
 
             {step.type === "predict" && step.solutionCode && (
               <pre className="mt-[2vmin] overflow-x-auto rounded-xl bg-neutral-900 p-[2vmin] text-neutral-100">
@@ -216,12 +223,21 @@ export function Projector({
               </div>
             )}
 
-            {(step.choices || (step.type === "predict" && step.predictAnswer)) && (
+            {(step.type === "teach" ||
+              step.type === "turtle" ||
+              step.choices ||
+              (step.type === "predict" && step.predictAnswer)) && (
               <button
                 onClick={() => setRevealed((r) => !r)}
                 className="mt-[2vmin] rounded-xl border px-[2vmin] py-[1vmin] text-[1.8vmin] font-semibold hover:bg-black/5 dark:hover:bg-white/10"
               >
-                {revealed ? "🙈 Hide answer" : "👁 Ask the class, then reveal answer"}
+                {step.type === "teach" || step.type === "turtle"
+                  ? revealed
+                    ? "🙈 Hide explanation"
+                    : "👁 Discuss, then reveal explanation"
+                  : revealed
+                    ? "🙈 Hide answer"
+                    : "👁 Ask the class, then reveal answer"}
               </button>
             )}
 
