@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { useActionState, useEffect, useRef, useState } from "react";
 import { useFormStatus } from "react-dom";
 import { AVATARS, avatarEmoji } from "@/lib/avatars";
 import {
@@ -31,6 +31,12 @@ export function JoinFlow() {
     { status: "idle" },
   );
   const [showNew, setShowNew] = useState(false);
+  const [code, setCode] = useState("");
+  const formRef = useRef<HTMLFormElement>(null);
+
+  useEffect(() => {
+    if (lookup.status === "error") setCode("");
+  }, [lookup]);
 
   if (lookup.status === "ok" && !showNew) {
     return <Roster roster={lookup.roster} onNew={() => setShowNew(true)} />;
@@ -40,16 +46,27 @@ export function JoinFlow() {
   }
 
   return (
-    <form action={lookupSubmit} className="flex flex-col gap-4 text-center">
+    <form
+      ref={formRef}
+      action={lookupSubmit}
+      className="flex flex-col gap-4 text-center"
+    >
       <h1 className="text-3xl font-bold">Join your class</h1>
-      <p className="opacity-70">Type the class code your teacher put on the screen.</p>
+      <p className="opacity-70">Type the code your teacher put on the screen.</p>
       <input
         name="code"
+        value={code}
+        onChange={(e) => {
+          const digits = e.target.value.replace(/\D/g, "").slice(0, 5);
+          setCode(digits);
+          if (digits.length === 5) formRef.current?.requestSubmit();
+        }}
         autoFocus
         autoComplete="off"
-        autoCapitalize="none"
-        placeholder="blue-otter-lamp-7"
-        className="rounded-xl border px-4 py-3 text-center text-xl"
+        inputMode="numeric"
+        pattern="[0-9]*"
+        placeholder="12345"
+        className="rounded-xl border px-4 py-3 text-center text-4xl tracking-[0.4em] tabular-nums"
       />
       {lookup.status === "error" && (
         <p className="text-red-600">{lookup.message}</p>

@@ -61,7 +61,7 @@ export async function lookupClassAction(
   if (!cls[0]) {
     return {
       status: "error",
-      message: "That code didn't match a class. Check the spelling with your teacher.",
+      message: "That code didn't match a class. Double-check it with your teacher.",
     };
   }
 

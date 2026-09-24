@@ -84,7 +84,7 @@ async function main() {
   console.log("Seeding demo class...");
   await db
     .insert(classes)
-    .values({ name: "Demo Class", joinCode: "blue-otter-lamp-7" })
+    .values({ name: "Demo Class", joinCode: "12345" })
     .onConflictDoNothing({ target: classes.joinCode });
 
   const [{ count }] = await db.select({ count: sql<number>`count(*)` }).from(steps);

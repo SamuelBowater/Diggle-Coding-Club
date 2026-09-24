@@ -45,7 +45,7 @@ events          id, class_id, student_id, type, payload_json, created_at   (teac
 
 ## 4. Auth / session flow
 
-1. Teacher creates a class in admin -> gets a 4-word join code (e.g. `blue-otter-lamp-7`) and a projector URL.
+1. Teacher creates a class in admin -> gets a 5-digit numeric join code (e.g. `48213`) and a projector URL.
 2. Student first time: club URL -> enter join code -> pick name + avatar from a grid -> row created, `studentId` in signed httpOnly cookie (1 year).
 3. Student returning: club URL detects class -> shows avatar grid -> tap face -> cookie set -> into current lesson.
 4. Teacher admin behind a real password (env var or `teachers` row with hash).
