@@ -65,6 +65,15 @@ export function Projector({
   const [snap, setSnap] = useState<LiveSnapshot | null>(null);
   const [revealed, setRevealed] = useState(false);
   const mounted = useRef(false);
+  const iRef = useRef(i);
+  const unlockedOrderRef = useRef(unlockedOrder);
+
+  useEffect(() => {
+    iRef.current = i;
+  }, [i]);
+  useEffect(() => {
+    unlockedOrderRef.current = unlockedOrder;
+  }, [unlockedOrder]);
 
   // Ask the class first — hide the answer again whenever the slide changes.
   useEffect(() => {
@@ -104,6 +113,48 @@ export function Projector({
       clearInterval(iv);
     };
   }, [classId]);
+
+  // If another open projector (a second laptop, a TA's screen) moves the
+  // class further forward, follow along here too. Never moves this screen
+  // backward — reviewing a past step in one tab doesn't yank another tab
+  // back with it.
+  useEffect(() => {
+    let alive = true;
+    const tick = async () => {
+      try {
+        const res = await fetch(`/api/class/${classId}/pace`, { cache: "no-store" });
+        if (!res.ok || !alive) return;
+        const data = await res.json();
+        if (
+          typeof data.currentStepOrder === "number" &&
+          data.currentStepOrder > unlockedOrderRef.current
+        ) {
+          const idx = steps.findIndex((s) => s.order === data.currentStepOrder);
+          if (idx >= 0) setI(idx);
+          setUnlockedOrder(data.currentStepOrder);
+        }
+        // Catch up on a reveal made elsewhere too (self-heals within a
+        // couple of ticks even if a same-tick navigation briefly re-hides
+        // it — never forces hidden->shown the other way round).
+        const curStep = steps[iRef.current];
+        if (
+          curStep &&
+          typeof data.revealedStepOrder === "number" &&
+          data.revealedStepOrder >= curStep.order
+        ) {
+          setRevealed(true);
+        }
+      } catch {
+        /* ignore */
+      }
+    };
+    tick();
+    const iv = setInterval(tick, 4000);
+    return () => {
+      alive = false;
+      clearInterval(iv);
+    };
+  }, [classId, steps]);
 
   const unlockedIndex = steps.findIndex((s) => s.order === unlockedOrder);
   const canUnlockMore = unlockedIndex >= 0 && unlockedIndex < steps.length - 1;
