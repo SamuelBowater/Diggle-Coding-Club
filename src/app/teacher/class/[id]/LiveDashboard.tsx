@@ -86,7 +86,7 @@ export function LiveDashboard({ classId }: { classId: string }) {
                 <span className="truncate font-medium">{s.displayName}</span>
               </div>
               <div className="mt-1 text-xs opacity-90">
-                Step {s.activeStep}/{snap.totalSteps} · {s.completed} done
+                {s.completed}/{snap.totalSteps} done
               </div>
             </div>
           ))}

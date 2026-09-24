@@ -340,7 +340,7 @@ export function Projector({
               <span className="text-[2vmin] leading-none">{avatarEmoji(s.avatarKey)}</span>
               <span className="max-w-[10vmin] truncate font-semibold">{s.displayName}</span>
               <span className="opacity-80">
-                {s.activeStep}/{steps.length}
+                {s.completed}/{snap?.totalSteps ?? steps.length}
               </span>
             </div>
           ))}
