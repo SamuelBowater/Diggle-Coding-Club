@@ -46,6 +46,8 @@ export type CurrentStudent = {
   joinCode: string;
   currentLessonWeek: number;
   freeRoam: boolean;
+  pacedByTeacher: boolean;
+  currentStepOrder: number;
 };
 
 export async function getCurrentStudent(): Promise<CurrentStudent | null> {
@@ -65,6 +67,8 @@ export async function getCurrentStudent(): Promise<CurrentStudent | null> {
       joinCode: classes.joinCode,
       currentLessonWeek: classes.currentLessonWeek,
       freeRoam: classes.freeRoam,
+      pacedByTeacher: classes.pacedByTeacher,
+      currentStepOrder: classes.currentStepOrder,
     })
     .from(students)
     .innerJoin(classes, eq(students.classId, classes.id))

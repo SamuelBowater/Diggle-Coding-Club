@@ -1,7 +1,11 @@
 "use client";
 
 import { useTransition } from "react";
-import { setWeekAction, toggleFreeRoamAction } from "../../actions";
+import {
+  setWeekAction,
+  toggleFreeRoamAction,
+  toggleTeacherPaceAction,
+} from "../../actions";
 
 const WEEK_TITLES = [
   "Hello, Python!",
@@ -18,10 +22,12 @@ export function ClassControls({
   classId,
   week,
   freeRoam,
+  pacedByTeacher,
 }: {
   classId: string;
   week: number;
   freeRoam: boolean;
+  pacedByTeacher: boolean;
 }) {
   const [pending, start] = useTransition();
 
@@ -63,6 +69,31 @@ export function ClassControls({
         />
         Let students jump ahead to any week (free roam)
       </label>
+
+      <label className="mt-2 flex items-center gap-2 text-sm">
+        <input
+          type="checkbox"
+          checked={pacedByTeacher}
+          disabled={pending}
+          onChange={(e) =>
+            start(() => toggleTeacherPaceAction(classId, e.target.checked))
+          }
+        />
+        Keep the class together — students can&apos;t move past the step
+        you&apos;re on in the projector
+      </label>
+      {pacedByTeacher && (
+        <p className="mt-1 pl-6 text-xs opacity-60">
+          Step through the lesson on the{" "}
+          <a
+            href={`/teacher/class/${classId}/project`}
+            className="underline"
+          >
+            projector
+          </a>{" "}
+          to release each step. Bonus challenges are never gated.
+        </p>
+      )}
     </section>
   );
 }

@@ -34,7 +34,7 @@ export async function setWeekAction(classId: string, week: number) {
   await requireTeacher();
   await db
     .update(classes)
-    .set({ currentLessonWeek: Math.max(1, Math.min(8, week)) })
+    .set({ currentLessonWeek: Math.max(1, Math.min(8, week)), currentStepOrder: 1 })
     .where(eq(classes.id, classId));
   revalidatePath(`/teacher/class/${classId}`);
 }
@@ -43,6 +43,25 @@ export async function toggleFreeRoamAction(classId: string, value: boolean) {
   await requireTeacher();
   await db.update(classes).set({ freeRoam: value }).where(eq(classes.id, classId));
   revalidatePath(`/teacher/class/${classId}`);
+}
+
+export async function toggleTeacherPaceAction(classId: string, value: boolean) {
+  await requireTeacher();
+  await db
+    .update(classes)
+    .set({ pacedByTeacher: value })
+    .where(eq(classes.id, classId));
+  revalidatePath(`/teacher/class/${classId}`);
+  revalidatePath(`/teacher/class/${classId}/project`);
+}
+
+/** Called from the projector as the teacher steps through the lesson. */
+export async function setCurrentStepOrderAction(classId: string, order: number) {
+  await requireTeacher();
+  await db
+    .update(classes)
+    .set({ currentStepOrder: Math.max(1, order) })
+    .where(eq(classes.id, classId));
 }
 
 export async function renameStudentAction(

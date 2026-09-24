@@ -82,6 +82,13 @@ export default async function LessonPage({
         classWeek: student.currentLessonWeek,
         availableWeeks,
       }}
+      pacing={{
+        classId: student.classId,
+        // Pacing only makes sense while viewing the week the class is
+        // actually on — free-roaming ahead/behind is always self-paced.
+        enabled: student.pacedByTeacher && week === student.currentLessonWeek,
+        initialStepOrder: student.currentStepOrder,
+      }}
     />
   );
 }

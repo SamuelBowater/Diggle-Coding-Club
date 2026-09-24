@@ -23,6 +23,12 @@ export const classes = pgTable("classes", {
   currentLessonWeek: integer("current_lesson_week").notNull().default(1),
   // When false, students can only view up to currentLessonWeek.
   freeRoam: boolean("free_roam").notNull().default(false),
+  // When true, students can't move past whatever step the teacher's
+  // projector is currently showing (bonus challenges are exempt).
+  pacedByTeacher: boolean("paced_by_teacher").notNull().default(false),
+  // The `order` of the step the teacher's projector is currently on,
+  // within the current week's lesson. Resets to 1 when the week changes.
+  currentStepOrder: integer("current_step_order").notNull().default(1),
   namesLocked: boolean("names_locked").notNull().default(false),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });

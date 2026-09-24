@@ -81,6 +81,7 @@ export default async function ClassPage({
         classId={id}
         week={cls.currentLessonWeek}
         freeRoam={cls.freeRoam}
+        pacedByTeacher={cls.pacedByTeacher}
       />
 
       <div className="mt-6 flex items-center justify-between">

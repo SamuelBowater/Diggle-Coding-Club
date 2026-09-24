@@ -23,6 +23,12 @@ export default async function ProjectPage({
   if (!cls) notFound();
 
   const data = await getLessonByWeek(cls.currentLessonWeek);
+  const initialIndex = data
+    ? Math.max(
+        0,
+        data.steps.findIndex((s) => s.order === cls.currentStepOrder),
+      )
+    : 0;
 
   const h = await headers();
   const host = h.get("x-forwarded-host") ?? h.get("host") ?? "localhost:3000";
@@ -39,6 +45,8 @@ export default async function ProjectPage({
       qrSvg={svg}
       week={cls.currentLessonWeek}
       lessonTitle={data?.lesson.title ?? "Lesson coming soon"}
+      initialIndex={initialIndex}
+      pacedByTeacher={cls.pacedByTeacher}
       steps={
         data?.steps.map((s) => {
           const t = firstTest(s.testsJson);

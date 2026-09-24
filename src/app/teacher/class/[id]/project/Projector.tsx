@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Markdown } from "@/components/Markdown";
 import type { LiveSnapshot } from "@/lib/live";
+import { setCurrentStepOrderAction } from "../../../actions";
 
 type PStep = {
   id: string;
@@ -25,6 +26,8 @@ export function Projector({
   week,
   lessonTitle,
   steps,
+  initialIndex,
+  pacedByTeacher,
 }: {
   classId: string;
   className: string;
@@ -34,9 +37,24 @@ export function Projector({
   week: number;
   lessonTitle: string;
   steps: PStep[];
+  initialIndex: number;
+  pacedByTeacher: boolean;
 }) {
-  const [i, setI] = useState(0);
+  const [i, setI] = useState(initialIndex);
   const [snap, setSnap] = useState<LiveSnapshot | null>(null);
+  const mounted = useRef(false);
+
+  useEffect(() => {
+    // Skip the write on first mount — the index already reflects what's
+    // persisted, no need to round-trip it straight back.
+    if (!mounted.current) {
+      mounted.current = true;
+      return;
+    }
+    const step = steps[i];
+    if (step) setCurrentStepOrderAction(classId, step.order);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [i]);
 
   useEffect(() => {
     let alive = true;
@@ -81,6 +99,11 @@ export function Projector({
         <div>
           <p className="text-[1.6vmin] font-semibold uppercase tracking-widest text-emerald-600">
             {className} · Week {week}
+            {pacedByTeacher && (
+              <span className="ml-[1.5vmin] rounded-full bg-emerald-600 px-[1.2vmin] py-[0.2vmin] text-[1.3vmin] text-white">
+                🔒 Paced — students follow this screen
+              </span>
+            )}
           </p>
           <h1 className="text-[3vmin] font-bold">{lessonTitle}</h1>
         </div>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { PlayerBar } from "@/components/PlayerBar";
 import { Markdown } from "@/components/Markdown";
 import { PythonEditor } from "@/components/PythonEditor";
@@ -45,6 +45,7 @@ export function LessonPlayer({
   steps,
   challenges,
   weekNav,
+  pacing,
 }: {
   student: {
     displayName: string;
@@ -56,6 +57,7 @@ export function LessonPlayer({
   steps: PlayerStep[];
   challenges: PlayerStep[];
   weekNav: { freeRoam: boolean; classWeek: number; availableWeeks: number[] };
+  pacing: { classId: string; enabled: boolean; initialStepOrder: number };
 }) {
   const hasChallenges = challenges.length > 0;
   const pageCount = steps.length + (hasChallenges ? 1 : 0);
@@ -79,11 +81,41 @@ export function LessonPlayer({
       ),
   );
   const [celebration, setCelebration] = useState<SubmitResult | null>(null);
+  const [teacherStepOrder, setTeacherStepOrder] = useState(
+    pacing.initialStepOrder,
+  );
+
+  useEffect(() => {
+    if (!pacing.enabled) return;
+    let alive = true;
+    const tick = async () => {
+      try {
+        const res = await fetch(`/api/class/${pacing.classId}/pace`, {
+          cache: "no-store",
+        });
+        if (res.ok && alive) {
+          const data = await res.json();
+          setTeacherStepOrder(data.currentStepOrder);
+        }
+      } catch {
+        /* ignore */
+      }
+    };
+    tick();
+    const iv = setInterval(tick, 4000);
+    return () => {
+      alive = false;
+      clearInterval(iv);
+    };
+  }, [pacing.enabled, pacing.classId]);
 
   const onChallengePage = hasChallenges && index === steps.length;
   const step = onChallengePage ? null : steps[index];
   const stepDone = step ? done.has(step.id) : false;
   const coreDoneCount = steps.filter((s) => done.has(s.id)).length;
+  const nextStep = !onChallengePage && index + 1 < steps.length ? steps[index + 1] : null;
+  const nextLockedByTeacher =
+    pacing.enabled && !!nextStep && nextStep.order > teacherStepOrder;
 
   const handleComplete = useCallback(
     (res: SubmitResult, stepId: string) => {
@@ -125,20 +157,25 @@ export function LessonPlayer({
           />
         )}
         <div className="mb-3 flex items-center gap-1.5">
-          {steps.map((s, i) => (
-            <button
-              key={s.id}
-              onClick={() => setIndex(i)}
-              aria-label={`Step ${i + 1}`}
-              className={`h-2.5 flex-1 rounded-full transition-colors ${
-                done.has(s.id)
-                  ? "bg-emerald-500"
-                  : i === index
-                    ? "bg-emerald-300"
-                    : "bg-black/15 dark:bg-white/20"
-              }`}
-            />
-          ))}
+          {steps.map((s, i) => {
+            const locked = pacing.enabled && s.order > teacherStepOrder;
+            return (
+              <button
+                key={s.id}
+                onClick={() => setIndex(i)}
+                disabled={locked}
+                aria-label={`Step ${i + 1}`}
+                title={locked ? "Your teacher hasn't reached this step yet" : undefined}
+                className={`h-2.5 flex-1 rounded-full transition-colors ${
+                  done.has(s.id)
+                    ? "bg-emerald-500"
+                    : i === index
+                      ? "bg-emerald-300"
+                      : "bg-black/15 dark:bg-white/20"
+                } disabled:opacity-40`}
+              />
+            );
+          })}
           {hasChallenges && (
             <button
               onClick={() => setIndex(steps.length)}
@@ -202,25 +239,23 @@ export function LessonPlayer({
             onClick={() => setIndex((i) => Math.min(pageCount - 1, i + 1))}
             disabled={
               index >= pageCount - 1 ||
-              (!onChallengePage && !stepDone && step!.type !== "teach")
+              (!onChallengePage && !stepDone && step!.type !== "teach") ||
+              nextLockedByTeacher
             }
             className="rounded-xl bg-emerald-600 px-4 py-2 font-semibold text-white disabled:opacity-40"
           >
             Next →
           </button>
         </div>
+        {nextLockedByTeacher && stepDone && (
+          <p className="-mt-2 pb-4 text-right text-sm opacity-60">
+            ⏳ Waiting for your teacher to move on…
+          </p>
+        )}
       </div>
 
       {celebration && (
-        <Celebration
-          result={celebration}
-          onClose={() => {
-            setCelebration(null);
-            if (!onChallengePage) {
-              setIndex((i) => Math.min(pageCount - 1, i + 1));
-            }
-          }}
-        />
+        <Celebration result={celebration} onClose={() => setCelebration(null)} />
       )}
     </div>
   );
@@ -578,7 +613,7 @@ function Celebration({
           {b.icon} Badge unlocked: <b>{b.name}</b>
         </div>
       ))}
-      <div className="mt-2 text-sm opacity-70">tap to carry on</div>
+      <div className="mt-2 text-sm opacity-70">tap to close</div>
     </button>
   );
 }
